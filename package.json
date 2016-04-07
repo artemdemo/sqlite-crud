@@ -1,0 +1,19 @@
+{
+  "name": "sqlite-crud",
+  "version": "1.0.0",
+  "description": "List of functions for common CRUD operations with SQLite database",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artemdemo/sqlite-crud.git"
+  },
+  "author": "Artem Demo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/artemdemo/sqlite-crud/issues"
+  },
+  "homepage": "https://github.com/artemdemo/sqlite-crud#readme"
+}
