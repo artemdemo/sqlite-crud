@@ -6,6 +6,11 @@ Simple module for common CRUD operations with SQLite database.
 const DB = require('sqlite-crud')('./server/your-file.db');
 ```
 
+**Dependencies**
+
+* q
+* sqlite3
+
 ## API
 
 ### getDB
