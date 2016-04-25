@@ -24,8 +24,9 @@ const getDB = () => {
 
 /**
  * Insert row into given table
- * @param tableName {string}
- * @param data {object}
+ * @param tableName {String}
+ * @param data {Object}
+ * @returns {Promise}
  */
 const insertToTable = (tableName, data) => {
     let deferred = Q.defer();
@@ -91,7 +92,7 @@ const insertToTable = (tableName, data) => {
 
 /**
  * Update table row
- * @param tableName {string}
+ * @param tableName {String}
  * @param data {object}
  * @param where {Array}
  *  [
@@ -102,6 +103,7 @@ const insertToTable = (tableName, data) => {
  *      },
  *      ...
  *  ]
+ * @returns {Promise}
  */
 const updateInTable = (tableName, data, where) => {
     let deferred = Q.defer();
@@ -166,7 +168,8 @@ const updateInTable = (tableName, data, where) => {
 
 /**
  * Return first result row
- * @param query {string}
+ * @param query {String}
+ * @returns {Promise}
  */
 const getFromTable = (query) => {
     let deferred = Q.defer();
@@ -186,8 +189,30 @@ const getFromTable = (query) => {
 };
 
 /**
+ * Return all rows that fit to the given query
+ * @param query {String}
+ * @returns {Promise}
+ */
+const getAll = (query) => {
+    let deferred = Q.defer();
+    let DB = getDB();
+
+    DB.all(query, (err, rows) => {
+        if (err) {
+            console.log(chalk.red.bold('[getAll error]'), err);
+            console.log('QUERY was: ', query);
+            deferred.reject();
+        } else {
+            deferred.resolve(rows);
+        }
+    });
+
+    return deferred.promise;
+}
+
+/**
  * Delete rows from table
- * @param tableName {string}
+ * @param tableName {String}
  * @param where {Array}
  *  [
  *      {
@@ -197,6 +222,7 @@ const getFromTable = (query) => {
  *      },
  *      ...
  *  ]
+ * @returns {Promise}
  */
 const deleteRows = (tableName, where) => {
     let deferred = Q.defer();
@@ -253,6 +279,7 @@ module.exports = (dbPath) => {
         insertToTable: insertToTable,
         updateInTable: updateInTable,
         getFromTable: getFromTable,
+        getAll: getAll,
         deleteRows: deleteRows
     };
 };
