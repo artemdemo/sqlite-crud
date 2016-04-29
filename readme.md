@@ -97,6 +97,16 @@ DB.updateInTable('tasks', {
 DB.getFromTable(query);
 ```
 
+### getAll
+
+```javascript
+/**
+ * Return all results (rows) for given query
+ * @param query {string}
+ */
+DB.getAll(query);
+```
+
 ### deleteRows
 
 ```javascript
