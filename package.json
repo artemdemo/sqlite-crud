@@ -4,7 +4,7 @@
   "description": "List of functions for common CRUD operations with SQLite database",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node node_modules/jasmine/bin/jasmine"
   },
   "repository": {
     "type": "git",
@@ -15,9 +15,13 @@
   "bugs": {
     "url": "https://github.com/artemdemo/sqlite-crud/issues"
   },
-  "peerDependencies": {
+  "homepage": "https://github.com/artemdemo/sqlite-crud#readme",
+  "devDependencies": {
+    "jasmine": "^2.4.1"
+  },
+  "dependencies": {
+    "chalk": "^1.1.3",
     "q": "^1.4.1",
     "sqlite3": "^3.1.3"
-  },
-  "homepage": "https://github.com/artemdemo/sqlite-crud#readme"
+  }
 }

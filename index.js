@@ -252,6 +252,7 @@ const deleteRows = (tableName, where) => {
     });
 
     // console.log(chalk.blue('Query:'), query);
+    // console.log('columnValues', columnValues);
 
     DB.run(query, columnValues, (error) => {
         if (error) {
@@ -272,7 +273,7 @@ module.exports = (dbPath) => {
     dbFile = fs.existsSync(dbFileName);
 
     if(!dbFile) {
-        console.log('There is no DB. Creating new empty file');
+        console.log(chalk.yellow('[Info]'),'There is no DB. Creating new empty file');
         fs.openSync(dbFileName, "w");
     }
 

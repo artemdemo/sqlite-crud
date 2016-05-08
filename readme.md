@@ -97,6 +97,18 @@ DB.updateInTable('tasks', {
 DB.getFromTable(query);
 ```
 
+```javascript
+DB.getFromTable('SELECT * FROM ' + testTableName + ';')
+    .then((result) => {
+        // result - will be an object
+        // If there is no match will be undefined
+        deferred.resolve(result);
+    }, () => {
+        console.log(chalk.red.bold('[getFromTable error]'), error);
+        deferred.reject();
+    });
+```
+
 ### getAll
 
 ```javascript
@@ -105,6 +117,17 @@ DB.getFromTable(query);
  * @param query {string}
  */
 DB.getAll(query);
+```
+
+```javascript
+DB.getAll('SELECT * FROM ' + testTableName + ';')
+    .then((rows) => {
+        // rows - will be an array
+        deferred.resolve(rows);
+    }, (error) => {
+        console.log(chalk.red.bold('[getAll error]'), error);
+        deferred.reject();
+    });
 ```
 
 ### deleteRows
