@@ -58,7 +58,7 @@ const insertToTable = (tableName, data) => {
     });
     query += ')';
 
-    //console.log(chalk.blue('Query:'), query);
+    // console.log(chalk.blue('Query:'), query);
 
     let stmt = DB.prepare(query);
     stmt.run(columnValues, function(error) {
@@ -137,7 +137,7 @@ const updateInTable = (tableName, data, where) => {
     columns.forEach((column, i) => {
         query += column + ' = ?';
         if (i < columns.length - 1) {
-            query += ' AND ';
+            query += ', ';
         }
     });
 
@@ -146,21 +146,20 @@ const updateInTable = (tableName, data, where) => {
     where.forEach((whereItem, i) => {
         query += whereItem.column + ' ' + whereItem.comparator + ' ?';
         if (i < where.length - 1) {
-            query += ', ';
+            query += ' AND ';
         }
         columnValues.push(whereItem.value);
     });
 
-    //console.log(chalk.blue('Query:'), query);
+    // console.log(chalk.blue('Query:'), query);
+    // console.log('columnValues', columnValues);
 
     DB.run(query, columnValues, (error) => {
         if (error) {
             console.log(chalk.red.bold('[updateInTable error]'), error);
-            console.log(chalk.blue('Query was:'), query);
-            console.log(chalk.blue('Values:'), columnValues);
             deferred.reject();
         } else {
-            console.log(chalk.blue('Inserted '), where);
+            console.log(chalk.blue('Updated '), where);
             deferred.resolve();
         }
     });
@@ -180,7 +179,7 @@ const getFromTable = (query) => {
     DB.get(query, (err, row) => {
         if (err) {
             console.log(chalk.red.bold('[getFromTable error]'), err);
-            console.log(chalk.blue('Query was:'), query);
+            console.log('QUERY was: ', query);
             deferred.reject();
         } else {
             deferred.resolve(row);
@@ -202,7 +201,7 @@ const getAll = (query) => {
     DB.all(query, (err, rows) => {
         if (err) {
             console.log(chalk.red.bold('[getAll error]'), err);
-            console.log(chalk.blue('Query was:'), query);
+            console.log('QUERY was: ', query);
             deferred.reject();
         } else {
             deferred.resolve(rows);
@@ -258,7 +257,6 @@ const deleteRows = (tableName, where) => {
         if (error) {
             console.log(chalk.red.bold('[deleteRows error]'), error);
             console.log(chalk.blue('Query was:'), query);
-            console.log(chalk.blue('Values:'), columnValues);
             deferred.reject();
         } else {
             console.log(chalk.blue('Deleted '), where);
