@@ -254,15 +254,18 @@ const deleteRows = (tableName, where) => {
     // console.log(chalk.blue('Query:'), query);
     // console.log('columnValues', columnValues);
 
-    DB.run(query, columnValues, (error) => {
-        if (error) {
-            console.log(chalk.red.bold('[deleteRows error]'), error);
-            console.log(chalk.blue('Query was:'), query);
-            deferred.reject();
-        } else {
-            console.log(chalk.blue('Deleted '), where);
-            deferred.resolve();
-        }
+    DB.serialize(function() {
+        DB.run('PRAGMA foreign_keys = ON;');
+        DB.run(query, columnValues, (error) => {
+            if (error) {
+                console.log(chalk.red.bold('[deleteRows error]'), error);
+                console.log(chalk.blue('Query was:'), query);
+                deferred.reject();
+            } else {
+                console.log(chalk.blue('Deleted '), where);
+                deferred.resolve();
+            }
+        });
     });
 
     return deferred.promise;
