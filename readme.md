@@ -21,7 +21,7 @@ Will return database object and you can use it for your own calls
 const myDB = DB.getDB();
 ```
 
-### insertToTable
+### insertRow
 
 ```javascript
 /**
@@ -29,11 +29,11 @@ const myDB = DB.getDB();
  * @param tableName {string}
  * @param data {object}
  */
-DB.insertToTable(tableName, data);
+DB.insertRow(tableName, data);
 ```
 
 ```javascript
-DB.insertToTable('tasks', {
+DB.insertRow('tasks', {
         name: newTask.name,
         description: newTask.description,
         added: now.format('YYYY-MM-DD HH:mm:ss'),
@@ -50,7 +50,7 @@ DB.insertToTable('tasks', {
     });
 ```
 
-### updateInTable
+### updateRow
 
 ```javascript
 /**
@@ -67,11 +67,11 @@ DB.insertToTable('tasks', {
  *      ...
  *  ]
  */
-DB.updateInTable(tableName, data, where);
+DB.updateRow(tableName, data, where);
 ```
 
 ```javascript
-DB.updateInTable('tasks', {
+DB.updateRow('tasks', {
         name: task.name,
         description: task.description,
         updated: now.format('YYYY-MM-DD HH:mm:ss')
@@ -87,47 +87,38 @@ DB.updateInTable('tasks', {
     });
 ```
 
-### getFromTable
+### getRows
 
 ```javascript
 /**
- * Return first result row
- * @param query {string}
+ * Fetch rows from the table
+ * @param tableName {String}
+ * @param where {Array}
+ *  [
+ *      {
+ *          column: '',
+ *          comparator: '',
+ *          value: ''
+ *      },
+ *      ...
+ *  ]
+ * @returns {Promise}
  */
-DB.getFromTable(query);
+ DB.getRows(tableName, where);
 ```
 
 ```javascript
-DB.getFromTable('SELECT * FROM ' + testTableName + ';')
-    .then((result) => {
-        // result - will be an object
-        // If there is no match will be undefined
-        deferred.resolve(result);
-    }, () => {
-        console.log(chalk.red.bold('[getFromTable error]'), error);
-        deferred.reject();
-    });
-```
-
-### getAll
-
-```javascript
-/**
- * Return all results (rows) for given query
- * @param query {string}
- */
-DB.getAll(query);
-```
-
-```javascript
-DB.getAll('SELECT * FROM ' + testTableName + ';')
-    .then((rows) => {
-        // rows - will be an array
-        deferred.resolve(rows);
-    }, (error) => {
-        console.log(chalk.red.bold('[getAll error]'), error);
-        deferred.reject();
-    });
+DB.getRows('tasks', [{
+        column: 'id',
+        comparator: '=',
+        value: id
+    }])
+        .then((rows) => {
+            deferred.resolve(rows);
+        }, () => {
+            console.log(chalk.red.bold('[error]'), error);
+            deferred.reject();
+        });
 ```
 
 ### deleteRows
@@ -158,6 +149,49 @@ DB.deleteRows('tasks', [{
         deferred.resolve();
     }, (error) => {
         console.log(chalk.red.bold('[deleteTask error]'), error);
+        deferred.reject();
+    });
+```
+
+### queryOneRow
+
+```javascript
+/**
+ * Return first result row
+ * @param query {string}
+ */
+DB.queryOneRow(query);
+```
+
+```javascript
+DB.queryOneRow('SELECT * FROM ' + testTableName + ';')
+    .then((result) => {
+        // result - will be an object
+        // If there is no match will be undefined
+        deferred.resolve(result);
+    }, () => {
+        console.log(chalk.red.bold('[getFromTable error]'), error);
+        deferred.reject();
+    });
+```
+
+### queryRows
+
+```javascript
+/**
+ * Return all results (rows) for given query
+ * @param query {string}
+ */
+DB.queryRows(query);
+```
+
+```javascript
+DB.queryRows('SELECT * FROM ' + testTableName + ';')
+    .then((rows) => {
+        // rows - will be an array
+        deferred.resolve(rows);
+    }, (error) => {
+        console.log(chalk.red.bold('[getAll error]'), error);
         deferred.reject();
     });
 ```

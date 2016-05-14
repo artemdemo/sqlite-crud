@@ -28,7 +28,7 @@ const getDB = () => {
  * @param data {Object}
  * @returns {Promise}
  */
-const insertToTable = (tableName, data) => {
+const insertRow = (tableName, data) => {
     let deferred = Q.defer();
     let DB = getDB();
     let query = 'INSERT INTO ' + tableName + ' ';
@@ -51,7 +51,7 @@ const insertToTable = (tableName, data) => {
     }
     query += '(' + columns.join(',') + ') VALUES (';
     columns.forEach((column, i) => {
-            query += '?';
+        query += '?';
         if (i < columns.length - 1) {
             query += ',';
         }
@@ -105,7 +105,7 @@ const insertToTable = (tableName, data) => {
  *  ]
  * @returns {Promise}
  */
-const updateInTable = (tableName, data, where) => {
+const updateRow = (tableName, data, where) => {
     let deferred = Q.defer();
     let DB = getDB();
     let query = 'UPDATE ' + tableName + ' SET ';
@@ -168,11 +168,66 @@ const updateInTable = (tableName, data, where) => {
 };
 
 /**
+ * Fetch rows from the table
+ * @param tableName {String}
+ * @param where {Array}
+ *  [
+ *      {
+ *          column: '',
+ *          comparator: '',
+ *          value: ''
+ *      },
+ *      ...
+ *  ]
+ * @returns {Promise}
+ */
+const getRows = (tableName, where) => {
+    let deferred = Q.defer();
+    let DB = getDB();
+    let query = 'SELECT * FROM ' + tableName;
+    let whereValues = [];
+    if (!tableName) {
+        throw new Error('`tableName` is not provided');
+    }
+    if (!where) {
+        throw new Error('`where` is not provided');
+    } else if (!where.hasOwnProperty('length')) {
+        throw new Error('`where` should be an array');
+    } else if (where.length == 0) {
+        throw new Error('There is no data in `where` object');
+    }
+
+    query += ' WHERE ';
+
+    where.forEach((whereItem, i) => {
+        query += whereItem.column + ' ' + whereItem.comparator + ' ?';
+        if (i < where.length - 1) {
+            query += ' AND ';
+        }
+        whereValues.push(whereItem.value);
+    });
+
+    // console.log(chalk.blue('Query:'), query);
+    // console.log('whereValues', whereValues);
+
+    DB.all(query, whereValues, (error, rows) => {
+        if (error) {
+            console.log(chalk.red.bold('[getRows error]'), error);
+            deferred.reject();
+        } else {
+            deferred.resolve(rows);
+        }
+    });
+
+    return deferred.promise;
+};
+
+/**
  * Return first result row
  * @param query {String}
  * @returns {Promise}
  */
-const getFromTable = (query) => {
+const queryOneRow = (query) => {
     let deferred = Q.defer();
     let DB = getDB();
 
@@ -194,7 +249,7 @@ const getFromTable = (query) => {
  * @param query {String}
  * @returns {Promise}
  */
-const getAll = (query) => {
+const queryRows = (query) => {
     let deferred = Q.defer();
     let DB = getDB();
 
@@ -209,7 +264,7 @@ const getAll = (query) => {
     });
 
     return deferred.promise;
-}
+};
 
 /**
  * Delete rows from table
@@ -282,10 +337,11 @@ module.exports = (dbPath) => {
 
     return {
         getDB: getDB,
-        insertToTable: insertToTable,
-        updateInTable: updateInTable,
-        getFromTable: getFromTable,
-        getAll: getAll,
-        deleteRows: deleteRows
+        insertRow: insertRow,
+        updateRow: updateRow,
+        getRows: getRows,
+        deleteRows: deleteRows,
+        queryOneRow: queryOneRow,
+        queryRows: queryRows
     };
 };
