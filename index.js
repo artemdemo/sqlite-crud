@@ -6,20 +6,9 @@
 
 'use strict';
 
-const fs = require('fs');
 const Q = require('q');
 const chalk = require('chalk');
-
-let dbFileName;
-let dbFile;
-
-const sqlite3 = require('sqlite3').verbose();
-let db = null;
-
-const getDB = () => {
-    db = db || new sqlite3.Database(dbFileName);
-    return db;
-};
+const dbInstance = require('./source/db-instance');
 
 
 /**
@@ -30,7 +19,7 @@ const getDB = () => {
  */
 const insertRow = (tableName, data) => {
     let deferred = Q.defer();
-    let DB = getDB();
+    let DB = dbInstance.getDB();
     let query = 'INSERT INTO ' + tableName + ' ';
     let columns = [];
     let columnValues = [];
@@ -107,7 +96,7 @@ const insertRow = (tableName, data) => {
  */
 const updateRow = (tableName, data, where) => {
     let deferred = Q.defer();
-    let DB = getDB();
+    let DB = dbInstance.getDB();
     let query = 'UPDATE ' + tableName + ' SET ';
     let columns = [];
     let columnValues = [];
@@ -183,7 +172,7 @@ const updateRow = (tableName, data, where) => {
  */
 const getRows = (tableName, where) => {
     let deferred = Q.defer();
-    let DB = getDB();
+    let DB = dbInstance.getDB();
     let query = 'SELECT * FROM ' + tableName;
     let whereValues = [];
     if (!tableName) {
@@ -229,7 +218,7 @@ const getRows = (tableName, where) => {
  */
 const queryOneRow = (query) => {
     let deferred = Q.defer();
-    let DB = getDB();
+    let DB = dbInstance.getDB();
 
     DB.get(query, (err, row) => {
         if (err) {
@@ -251,7 +240,7 @@ const queryOneRow = (query) => {
  */
 const queryRows = (query) => {
     let deferred = Q.defer();
-    let DB = getDB();
+    let DB = dbInstance.getDB();
 
     DB.all(query, (err, rows) => {
         if (err) {
@@ -282,7 +271,7 @@ const queryRows = (query) => {
  */
 const deleteRows = (tableName, where) => {
     let deferred = Q.defer();
-    let DB = getDB();
+    let DB = dbInstance.getDB();
     let query = 'DELETE FROM ' + tableName;
     let columnValues = [];
     if (!tableName) {
@@ -327,21 +316,15 @@ const deleteRows = (tableName, where) => {
 };
 
 module.exports = (dbPath) => {
-    dbFileName = dbPath;
-    dbFile = fs.existsSync(dbFileName);
-
-    if(!dbFile) {
-        console.log(chalk.yellow('[Info]'),'There is no DB. Creating new empty file');
-        fs.openSync(dbFileName, "w");
-    }
+    dbInstance.connectToDB(dbPath);
 
     return {
-        getDB: getDB,
-        insertRow: insertRow,
-        updateRow: updateRow,
-        getRows: getRows,
-        deleteRows: deleteRows,
-        queryOneRow: queryOneRow,
-        queryRows: queryRows
+        getDB: dbInstance.getDB,
+        insertRow,
+        updateRow,
+        getRows,
+        deleteRows,
+        queryOneRow,
+        queryRows
     };
 };
