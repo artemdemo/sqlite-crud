@@ -9,6 +9,8 @@
 const Q = require('q');
 const chalk = require('chalk');
 const dbInstance = require('./source/db-instance');
+const migrate = require('./source/migrate');
+const verbose = require('./source/verbose');
 
 
 /**
@@ -145,10 +147,14 @@ const updateRow = (tableName, data, where) => {
 
     DB.run(query, columnValues, (error) => {
         if (error) {
-            console.log(chalk.red.bold('[updateInTable error]'), error);
+            if (verbose.getVerbose()) {
+                console.log(chalk.red.bold('[updateInTable error]'), error);
+            }
             deferred.reject();
         } else {
-            console.log(chalk.blue('Updated '), where);
+            if (verbose.getVerbose()) {
+                console.log(chalk.blue('Updated '), where);
+            }
             deferred.resolve();
         }
     });
@@ -201,7 +207,9 @@ const getRows = (tableName, where) => {
 
     DB.all(query, whereValues, (error, rows) => {
         if (error) {
-            console.log(chalk.red.bold('[getRows error]'), error);
+            if (verbose.getVerbose()) {
+                console.log(chalk.red.bold('[getRows error]'), error);
+            }
             deferred.reject();
         } else {
             deferred.resolve(rows);
@@ -222,8 +230,10 @@ const queryOneRow = (query) => {
 
     DB.get(query, (err, row) => {
         if (err) {
-            console.log(chalk.red.bold('[getFromTable error]'), err);
-            console.log('QUERY was: ', query);
+            if (verbose.getVerbose()) {
+                console.log(chalk.red.bold('[getFromTable error]'), err);
+                console.log('QUERY was: ', query);
+            }
             deferred.reject();
         } else {
             deferred.resolve(row);
@@ -244,8 +254,10 @@ const queryRows = (query) => {
 
     DB.all(query, (err, rows) => {
         if (err) {
-            console.log(chalk.red.bold('[getAll error]'), err);
-            console.log('QUERY was: ', query);
+            if (verbose.getVerbose()) {
+                console.log(chalk.red.bold('[getAll error]'), err);
+                console.log('QUERY was: ', query);
+            }
             deferred.reject();
         } else {
             deferred.resolve(rows);
@@ -302,11 +314,15 @@ const deleteRows = (tableName, where) => {
         DB.run('PRAGMA foreign_keys = ON;');
         DB.run(query, columnValues, (error) => {
             if (error) {
-                console.log(chalk.red.bold('[deleteRows error]'), error);
-                console.log(chalk.blue('Query was:'), query);
+                if (verbose.getVerbose()) {
+                    console.log(chalk.red.bold('[deleteRows error]'), error);
+                    console.log(chalk.blue('Query was:'), query);
+                }
                 deferred.reject();
             } else {
-                console.log(chalk.blue('Deleted '), where);
+                if (verbose.getVerbose()) {
+                    console.log(chalk.blue('Deleted '), where);
+                }
                 deferred.resolve();
             }
         });
@@ -325,6 +341,8 @@ module.exports = (dbPath) => {
         getRows,
         deleteRows,
         queryOneRow,
-        queryRows
+        queryRows,
+        migrate,
+        setVerbose: verbose.setVerbose
     };
 };

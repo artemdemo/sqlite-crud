@@ -1,0 +1,3 @@
+{
+    "query": "CREATE TABLE test (id INTEGER PRIMARY KEY AUTOINCREMENT, name CHAR (100), description TEXT, added DATETIME);"
+}

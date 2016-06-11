@@ -195,3 +195,51 @@ DB.queryRows('SELECT * FROM ' + testTableName + ';')
         deferred.reject();
     });
 ```
+
+### Migration
+
+**File migration**
+
+```json
+{
+    "query": "CREATE TABLE test (id INTEGER PRIMARY KEY AUTOINCREMENT, name CHAR (100), description TEXT, added DATETIME);"
+}
+```
+
+or
+
+```json
+{
+    "queries": [
+        "CREATE TABLE dummy01 (id INTEGER PRIMARY KEY AUTOINCREMENT, name CHAR (100));",
+        "CREATE TABLE dummy02 (id INTEGER PRIMARY KEY AUTOINCREMENT, name CHAR (100));"
+    ]
+}
+```
+
+```javascript
+/**
+ * Migrate file
+ * @param pathToFile {String} - path to migrate json file
+ */
+DB.migrate(pathToFile)
+```
+
+```javascript
+DB.migrate('./migrations/20151102_create_dummy_tables.json')
+    .then(() => {
+        // Migration was successful
+    });
+```
+
+### Verbose log
+
+Print log from the module
+
+```javascript
+/**
+ * Print or not log of the module too the console
+ * @param newVerbose {Boolean}
+ */
+DB.setVerbose(newVerbose);
+```

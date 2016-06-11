@@ -6,32 +6,77 @@ const fs = require('fs');
 
 let DB;
 
-
-describe('Create new DB if don\'t exist and adding test table:', () => {
-
+describe('Create new DB', () => {
     try {
         // removing previous DB file, if there was one
         fs.unlinkSync(dbPath);
     } catch (e) {}
 
     DB = require('../index')(dbPath);
+    DB.setVerbose(false);
 
     it('DB file created', () => {
         fs.stat(dbPath, (error, stat) => {
             expect(error).toBe(null);
         });
     });
+});
+
+describe('Create test table with migration', () => {
+    it('Wrong file name reject promise', (done) => {
+        DB.migrate('spec/migrations/wrong_path.json')
+            .then(() => {
+            }, () => {
+                done();
+            });
+    });
 
     it('Added test table', (done) => {
-        const db = DB.getDB();
-        db.run('CREATE TABLE ' + testTableName + ' (id INTEGER PRIMARY KEY AUTOINCREMENT, name CHAR (100), description TEXT, added DATETIME);',
-            (error) => {
-                expect(!error).toBe(true);
+        DB.migrate('spec/migrations/20151101_create_test_table.json')
+            .then(() => {
                 done();
             });
     });
 });
 
+describe('Create 2 dummy tables with migration', () => {
+    it('Added 2 dummy tables', (done) => {
+        DB.migrate('spec/migrations/20151102_create_dummy_tables.json')
+            .then(() => {
+                done();
+            });
+    });
+
+    it('Add row to first dummy table', (done) => {
+        let rowId = 0;
+
+        DB.insertRow('dummy01', {
+            name: 'First dummy01'
+        }).then((result) => {
+            rowId = result.id;
+            expect(rowId).toBe(1);
+            done();
+        }, () => {
+            done();
+            throw new Error('Row is not added - error in DB');
+        });
+    });
+
+    it('Add row to second dummy table', (done) => {
+        let rowId = 0;
+
+        DB.insertRow('dummy02', {
+            name: 'First dummy02'
+        }).then((result) => {
+            rowId = result.id;
+            expect(rowId).toBe(1);
+            done();
+        }, () => {
+            done();
+            throw new Error('Row is not added - error in DB');
+        });
+    });
+});
 
 describe('Inserting new rows:', () => {
     let rowId = 0;

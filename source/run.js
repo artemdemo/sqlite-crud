@@ -1,5 +1,6 @@
 'use strict';
 
+const Q = require('q');
 const dbInstance = require('./db-instance');
 
 /**
