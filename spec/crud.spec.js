@@ -78,6 +78,17 @@ describe('Create 2 dummy tables with migration', () => {
     });
 });
 
+describe('Test migration file with wrong query', () => {
+    it('Wrong query should be rejected', (done) => {
+        DB.migrate('spec/migrations/20151103_wrong_query.json')
+            .then(() => {
+                // shouldn't get here
+            }, () => {
+                done();
+            });
+    });
+});
+
 describe('Inserting new rows:', () => {
     let rowId = 0;
 

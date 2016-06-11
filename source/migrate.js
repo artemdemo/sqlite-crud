@@ -4,7 +4,6 @@ const path = require('path');
 const Q = require('q');
 const chalk = require('chalk');
 const fs = require('fs');
-const dbInstance = require('./db-instance');
 const dbRun = require('./run');
 const verbose = require('./verbose');
 
