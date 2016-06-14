@@ -6,12 +6,16 @@ const chalk = require('chalk');
 const fs = require('fs');
 const dbRun = require('./run');
 const verbose = require('./verbose');
+const insertRow = require('./insertRow');
+const getRows = require('./getRows');
 
-const runQueries = (queries, index, parentDeferred) => {
+const migrationsTableName = 'migrations';
+
+const runQueries = (queries, index, parentDeferred, fileName) => {
     if (queries[index]) {
         dbRun(queries[index])
             .then(() => {
-                runQueries(queries, index + 1, parentDeferred);
+                runQueries(queries, index + 1, parentDeferred, fileName);
             }, (error) => {
                 if (verbose.getVerbose()) {
                     console.log(chalk.red.bold('[Migration query run error]', 'Given query: ' + queries[index]));
@@ -20,8 +24,64 @@ const runQueries = (queries, index, parentDeferred) => {
                 parentDeferred.reject();
             });
     } else {
-        parentDeferred.resolve();
+        addMigrationInfo(fileName)
+            .then(() => {
+                parentDeferred.resolve();
+            }, () => {
+                parentDeferred.reject();
+            });
     }
+};
+
+/**
+ * Add migration info to the table
+ * @param fileName {String} - file name of the migration
+ */
+const addMigrationInfo = (fileName) => {
+    let deferred = Q.defer();
+
+    insertRow(migrationsTableName, {
+        migration: fileName
+    }).then((result) => {
+        deferred.resolve();
+    }, () => {
+        if (verbose.getVerbose()) {
+            console.log(chalk.red.bold('[Migration]', 'Error while adding migration record'));
+            console.log(error);
+        }
+        deferred.reject();
+    });
+
+    return deferred.promise;
+};
+
+/**
+ * Check if given file record exists in migrations table
+ * @param fileName {String} - file name of the migration
+ */
+const checkMigration = (fileName) => {
+    let deferred = Q.defer();
+
+    getRows(migrationsTableName, [{
+        column: 'migration',
+        comparator: '=',
+        value: fileName
+    }])
+        .then((result) => {
+            if (result.length === 0) {
+                deferred.resolve();
+            } else {
+                if (verbose.getVerbose()) {
+                    console.log(chalk.red.bold('[Migration]', 'This file already migrated: ' + fileName));
+                    console.log(error);
+                }
+                deferred.reject();
+            }
+        }, () => {
+            deferred.reject();
+        });
+
+    return deferred.promise;
 };
 
 /**
@@ -72,28 +132,59 @@ const migrate = (pathToFile) => {
         return deferred.promise;
     }
 
-    const queries = migrationJson.queries || migrationJson.query;
+    dbRun('CREATE TABLE IF NOT EXISTS migrations (migration CHAR (255));')
+        .then(() => {
+            const queries = migrationJson.queries || migrationJson.query;
+            if (typeof queries == 'string') {
 
-    if (typeof queries == 'string') {
-        dbRun(queries)
-            .then(() => {
-                deferred.resolve();
-            }, (error) => {
+                // Check that migration file is not exists in the DB
+                checkMigration(fileName)
+                    .then(() => {
+
+                        // Run migration for given query from migration json file
+                        dbRun(queries)
+                            .then(() => {
+                                addMigrationInfo(fileName)
+                                    .then(() => {
+                                        deferred.resolve();
+                                    }, () => {
+                                        deferred.reject();
+                                    });
+                            }, (error) => {
+                                if (verbose.getVerbose()) {
+                                    console.log(chalk.red.bold('[Migration query run error]', 'Given query: ' + queries));
+                                    console.log(error);
+                                }
+                                deferred.reject();
+                            });
+                    }, () => {
+                        deferred.reject();
+                    });
+            } else if (Array.isArray(queries)) {
+
+                // Check that migration file is not exists in the DB
+                checkMigration(fileName)
+                    .then(() => {
+
+                        // Run migration for given query from migration json file
+                        runQueries(queries, 0, deferred, fileName);
+                    }, () => {
+                        deferred.reject();
+                    });
+            } else {
                 if (verbose.getVerbose()) {
-                    console.log(chalk.red.bold('[Migration query run error]', 'Given query: ' + queries));
-                    console.log(error);
+                    console.log(chalk.red.bold('[Migration queries error]', 'Query read error'));
+                    console.log(queries);
                 }
                 deferred.reject();
-            });
-    } else if (Array.isArray(queries)) {
-        runQueries(queries, 0, deferred);
-    } else {
-        if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[Migration queries error]', 'Query read error'));
-            console.log(queries);
-        }
-        deferred.reject();
-    }
+            }
+        }, (error) => {
+            if (verbose.getVerbose()) {
+                console.log(chalk.red.bold('[Migration]', 'Creating migrations table error'));
+                console.log(error);
+            }
+            deferred.reject();
+        });
 
     return deferred.promise;
 };

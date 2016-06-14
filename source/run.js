@@ -6,7 +6,6 @@ const dbInstance = require('./db-instance');
 /**
  * Proxy function for run
  * @param query
- * @returns {*}
  */
 const run = (query) => {
     let deferred = Q.defer();

@@ -37,12 +37,28 @@ describe('Create test table with migration', () => {
                 done();
             });
     });
+
+    it('Test table can\'t be added twice', (done) => {
+        DB.migrate('spec/migrations/20151101_create_test_table.json')
+            .then(() => {
+            }, () => {
+                done();
+            });
+    });
 });
 
 describe('Create 2 dummy tables with migration', () => {
     it('Added 2 dummy tables', (done) => {
         DB.migrate('spec/migrations/20151102_create_dummy_tables.json')
             .then(() => {
+                done();
+            });
+    });
+
+    it('2 dummy tables can\'t be added twice', (done) => {
+        DB.migrate('spec/migrations/20151102_create_dummy_tables.json')
+            .then(() => {
+            }, () => {
                 done();
             });
     });
