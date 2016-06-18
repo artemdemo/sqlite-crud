@@ -12,7 +12,8 @@ describe('Create new DB:', () => {
         fs.unlinkSync(dbPath);
     } catch (e) {}
 
-    DB = require('../index')(dbPath);
+    DB = require('../index');
+    DB.connectToDB(dbPath);
     DB.setVerbose(false);
 
     it('DB file created', () => {

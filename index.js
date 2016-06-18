@@ -208,18 +208,19 @@ const deleteRows = (tableName, where) => {
     return deferred.promise;
 };
 
-module.exports = (dbPath) => {
+const connectToDB = (dbPath) => {
     dbInstance.connectToDB(dbPath);
+};
 
-    return {
-        getDB: dbInstance.getDB,
-        insertRow,
-        updateRow,
-        getRows,
-        deleteRows,
-        queryOneRow,
-        queryRows,
-        migrate,
-        setVerbose: verbose.setVerbose
-    };
+module.exports = {
+    getDB: dbInstance.getDB,
+    connectToDB,
+    insertRow,
+    updateRow,
+    getRows,
+    deleteRows,
+    queryOneRow,
+    queryRows,
+    migrate,
+    setVerbose: verbose.setVerbose
 };
