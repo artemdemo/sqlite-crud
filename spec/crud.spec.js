@@ -6,7 +6,7 @@ const fs = require('fs');
 
 let DB;
 
-describe('Create new DB', () => {
+describe('Create new DB:', () => {
     try {
         // removing previous DB file, if there was one
         fs.unlinkSync(dbPath);
@@ -22,7 +22,7 @@ describe('Create new DB', () => {
     });
 });
 
-describe('Create test table with migration', () => {
+describe('Create test table with migration:', () => {
     it('Wrong file name reject promise', (done) => {
         DB.migrate('spec/migrations/wrong_path.json')
             .then(() => {
@@ -45,9 +45,28 @@ describe('Create test table with migration', () => {
                 done();
             });
     });
+
+    it('Test table file name added to `migrations` table once', (done) => {
+        DB.queryRows('SELECT * FROM migrations;')
+            .then((results) => {
+                let fileNamesCounter = 0;
+                results.forEach((row) => {
+                    switch(row.migration) {
+                        case '20151101_create_test_table.json':
+                            fileNamesCounter++;
+                            break;
+                    }
+                });
+                expect(fileNamesCounter).toBe(1);
+                done();
+            }, () => {
+                done();
+                throw new Error('Error in DB');
+            });
+    });
 });
 
-describe('Create 2 dummy tables with migration', () => {
+describe('Create 2 dummy tables with migration:', () => {
     it('Added 2 dummy tables', (done) => {
         DB.migrate('spec/migrations/20151102_create_dummy_tables.json')
             .then(() => {
@@ -94,7 +113,7 @@ describe('Create 2 dummy tables with migration', () => {
     });
 });
 
-describe('Test migration file with wrong query', () => {
+describe('Test migration file with wrong query:', () => {
     it('Wrong query should be rejected', (done) => {
         DB.migrate('spec/migrations/20151103_wrong_query.json')
             .then(() => {
@@ -329,5 +348,89 @@ describe('Remove rows from table:', () => {
                 done();
                 throw new Error('Error in DB');
             });
+    });
+});
+
+describe('Migrate folder:', () => {
+    it('Create tables', (done) => {
+        DB.migrate('spec/migrations_dir')
+            .then(() => {
+                done();
+            });
+    });
+
+    it('Tables can be created only once', (done) => {
+        DB.migrate('spec/migrations_dir')
+            .then(() => {
+            }, () => {
+                done();
+            });
+    });
+
+    it('File names added to `migrations` table', (done) => {
+        DB.queryRows('SELECT * FROM migrations;')
+            .then((results) => {
+                let fileNamesCounter = 0;
+                results.forEach((row) => {
+                    switch(row.migration) {
+                        case '20150616_dummy03_table.json':
+                            fileNamesCounter++;
+                            break;
+                        case '20150618_dummy04-05_tables.json':
+                            fileNamesCounter++;
+                            break;
+                    }
+                });
+                expect(fileNamesCounter).toBe(2);
+                done();
+            }, () => {
+                done();
+                throw new Error('Error in DB');
+            });
+    });
+
+    it('Add row to third dummy table', (done) => {
+        let rowId = 0;
+
+        DB.insertRow('dummy03', {
+            name: 'First dummy03'
+        }).then((result) => {
+            rowId = result.id;
+            expect(rowId).toBe(1);
+            done();
+        }, () => {
+            done();
+            throw new Error('Row is not added - error in DB');
+        });
+    });
+
+    it('Add row to fourth dummy table', (done) => {
+        let rowId = 0;
+
+        DB.insertRow('dummy04', {
+            name: 'First dummy04'
+        }).then((result) => {
+            rowId = result.id;
+            expect(rowId).toBe(1);
+            done();
+        }, () => {
+            done();
+            throw new Error('Row is not added - error in DB');
+        });
+    });
+
+    it('Add row to fifth dummy table', (done) => {
+        let rowId = 0;
+
+        DB.insertRow('dummy05', {
+            name: 'First dummy05'
+        }).then((result) => {
+            rowId = result.id;
+            expect(rowId).toBe(1);
+            done();
+        }, () => {
+            done();
+            throw new Error('Row is not added - error in DB');
+        });
     });
 });

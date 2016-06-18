@@ -1,0 +1,2 @@
+{
+    "queries": "CREATE TABLE dummy03 (id INTEGER PRIMARY KEY AUTOINCREMENT, name CHAR (100));"}

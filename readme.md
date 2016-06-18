@@ -220,7 +220,7 @@ or
 ```javascript
 /**
  * Migrate file
- * @param pathToFile {String} - path to migrate json file
+ * @param pathToFile {String} - path to migrate json file (or folder)
  */
 DB.migrate(pathToFile)
 ```

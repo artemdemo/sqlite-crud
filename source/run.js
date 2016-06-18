@@ -5,9 +5,10 @@ const dbInstance = require('./db-instance');
 
 /**
  * Proxy function for run
- * @param query
+ * @param query {String}
+ * @param saveRun {Boolean} if `true` will always resolve promise
  */
-const run = (query) => {
+const run = (query, saveRun) => {
     let deferred = Q.defer();
     const DB = dbInstance.getDB();
 
@@ -25,7 +26,11 @@ const run = (query) => {
     DB.run(query,
         (error) => {
             if (error) {
-                deferred.reject(error);
+                if (saveRun) {
+                    deferred.resolve(error);
+                } else {
+                    deferred.reject(error);
+                }
             } else {
                 // lastID - in case of INSERT
                 // changes - in case of UPDATE or DELETE
