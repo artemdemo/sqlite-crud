@@ -7,8 +7,14 @@ const dbInstance = require('./db-instance');
  * Proxy function for run
  * @param query {String}
  * @param saveRun {Boolean} if `true` will always resolve promise
+ * @param parameters {Array} array of parameters to th query
+ * @example
+ * In case you are passing parameters, function should be used in following way:
+ * ```
+ * run('INSERT INTO table_name (name, description) VALUES (?, ?)', false, ['run-test', 'run-test description'])
+ * ```
  */
-const run = (query, saveRun) => {
+const run = (query, saveRun, parameters) => {
     let deferred = Q.defer();
     const DB = dbInstance.getDB();
 
@@ -23,20 +29,24 @@ const run = (query, saveRun) => {
      *
      * @source https://github.com/mapbox/node-sqlite3/wiki/API#databaserunsql-param--callback
      */
-    DB.run(query,
-        (error) => {
-            if (error) {
-                if (saveRun) {
-                    deferred.resolve(error);
-                } else {
-                    deferred.reject(error);
-                }
+    const callback = function (error) {
+        if (error) {
+            if (saveRun) {
+                deferred.resolve(error);
             } else {
-                // lastID - in case of INSERT
-                // changes - in case of UPDATE or DELETE
-                deferred.resolve(this);
+                deferred.reject(error);
             }
-        });
+        } else {
+            // lastID - in case of INSERT
+            // changes - in case of UPDATE or DELETE
+            deferred.resolve(this);
+        }
+    }
+    if (parameters) {
+        DB.run(query, parameters, callback);
+    } else {
+        DB.run(query, callback);
+    }
 
     return deferred.promise;
 };

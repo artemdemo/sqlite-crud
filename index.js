@@ -12,6 +12,7 @@ const dbInstance = require('./source/db-instance');
 const migrate = require('./source/migrate');
 const insertRow = require('./source/insertRow');
 const getRows = require('./source/getRows');
+const run = require('./source/run');
 const verbose = require('./source/verbose');
 
 
@@ -221,6 +222,7 @@ module.exports = {
     deleteRows,
     queryOneRow,
     queryRows,
+    run,
     migrate,
     setVerbose: verbose.setVerbose
 };

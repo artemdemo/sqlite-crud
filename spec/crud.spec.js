@@ -341,7 +341,7 @@ describe('Remove rows from table:', () => {
     });
 
     it('There is no second row in table', (done) => {
-        DB.queryOneRow('SELECT * FROM ' + testTableName + ' WHERE id=2;')
+        DB.queryOneRow(`SELECT * FROM ${testTableName} WHERE id=2;`)
             .then((result) => {
                 expect(result).toBe(undefined);
                 done();
@@ -349,6 +349,20 @@ describe('Remove rows from table:', () => {
                 done();
                 throw new Error('Error in DB');
             });
+    });
+});
+
+describe('Test DB.run()', () => {
+    it('Insert row', (done) => {
+        DB.run(
+            `INSERT INTO ${testTableName} (name, description, added) VALUES ('run-test', 'run-test description', '2096-11-11 11:34');`
+        ).then((result) => {
+            expect(result.lastID > 1).toBe(true);
+            done();
+        }, () => {
+            done();
+            throw new Error('Error in DB');
+        });
     });
 });
 
