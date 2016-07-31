@@ -267,3 +267,10 @@ Print log from the module
  */
 DB.setVerbose(newVerbose);
 ```
+
+## SQLite database manager
+
+Multiplatform software for sqlite database managing:
+
+http://sqlitestudio.pl/
+
