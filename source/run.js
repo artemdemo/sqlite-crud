@@ -6,8 +6,8 @@ const dbInstance = require('./db-instance');
 /**
  * Proxy function for run
  * @param query {String}
- * @param parameters {Array} array of parameters to the query
- * @param options {Object}
+ * @param parameters {Array} array of parameters to the query (optional)
+ * @param options {Object} (optional)
  * @param options.saveRun {Boolean} if `true` will always resolve promise
  * @example
  * In case you are passing parameters, function should be used in following way:

@@ -181,6 +181,7 @@ DB.queryOneRow('SELECT * FROM ' + testTableName + ';')
 /**
  * Return all results (rows) for given query
  * @param query {string}
+ * @param parameters {Array} array of parameters to th query (optional)
  */
 DB.queryRows(query);
 ```
@@ -202,8 +203,8 @@ DB.queryRows('SELECT * FROM ' + testTableName + ';')
 /**
  * Proxy function for run
  * @param query {String}
- * @param parameters {Array} array of parameters to th query
- * @param options {Object}
+ * @param parameters {Array} array of parameters to th query (optional)
+ * @param options {Object} (optional)
  * @param options.saveRun {Boolean} if `true` will always resolve promise
  */
 ```

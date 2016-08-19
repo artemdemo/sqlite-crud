@@ -124,13 +124,13 @@ const queryOneRow = (query) => {
 /**
  * Return all rows that fit to the given query
  * @param query {String}
+ * @param parameters {Array} array of parameters to the query (optional)
  * @returns {Promise}
  */
-const queryRows = (query) => {
+const queryRows = (query, parameters) => {
     let deferred = Q.defer();
     let DB = dbInstance.getDB();
-
-    DB.all(query, (err, rows) => {
+    const callback = (err, rows) => {
         if (err) {
             if (verbose.getVerbose()) {
                 console.log(chalk.red.bold('[getAll error]'), err);
@@ -140,7 +140,13 @@ const queryRows = (query) => {
         } else {
             deferred.resolve(rows);
         }
-    });
+    };
+
+    if (parameters && Array.isArray(parameters)) {
+        DB.all(query, parameters, callback);
+    } else {
+        DB.all(query, callback);
+    }
 
     return deferred.promise;
 };

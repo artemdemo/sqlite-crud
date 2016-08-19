@@ -178,7 +178,7 @@ describe('Inserting new rows:', () => {
 describe('Getting rows from the table:', () => {
 
     it('Should be 3 rows in table', (done) => {
-        DB.queryRows('SELECT * FROM ' + testTableName + ';')
+        DB.queryRows(`SELECT * FROM ${testTableName};`)
             .then((rows) => {
                 expect(rows.length).toBe(3);
                 done();
@@ -188,8 +188,24 @@ describe('Getting rows from the table:', () => {
             });
     });
 
+    it('Should query 2 rows only', (done) => {
+       DB.queryRows(
+            `SELECT * FROM ${testTableName} WHERE name = ? OR id = ?;`,
+            ['First name', 3]
+        )
+            .then((rows) => {
+                expect(rows.length).toBe(2);
+                expect(rows[0].name).toBe('First name');
+                expect(rows[1].id).toBe(3);
+                done();
+            }, () => {
+                done();
+                throw new Error('Error in DB');
+            });
+    });
+
     it('First row in table', (done) => {
-        DB.queryOneRow('SELECT * FROM ' + testTableName + ';')
+        DB.queryOneRow(`SELECT * FROM ${testTableName};`)
             .then((result) => {
                 expect(result.name).toBe('First name');
                 done();
