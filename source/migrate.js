@@ -135,8 +135,8 @@ const runMigrationQueries = (queries, fileName) => {
 };
 
 /**
- * Run runMigrationQueries over object of migration files
- * @param dirQueries
+ * Recursively run queries of migration files
+ * @param dirQueries {Object}
  * @example
  * {
  *    "20150616_dummy_tables.json": [
@@ -145,20 +145,32 @@ const runMigrationQueries = (queries, fileName) => {
  *    ],
  *    "20160101_alter_dummy_table.json": []
  * }
+ * @param keys {Array}
+ * @param keyId {Number}
  * @returns {promise}
  */
-const runDirQueries = (dirQueries) => {
+const runDirQueries = (dirQueries, keys, keyId = 0) => {
     let deferred = Q.defer();
-    let promisesList = [];
-    for (let fileName in dirQueries) {
-        promisesList.push(runMigrationQueries(dirQueries[fileName], fileName));
+
+    if (dirQueries[keys[keyId]]) {
+        runMigrationQueries(dirQueries[keys[keyId]], keys[keyId])
+            .then(() => {
+                if (dirQueries[keys[keyId + 1]]) {
+                    runDirQueries(dirQueries, keys, keyId + 1)
+                        .then(
+                            () => deferred.resolve(),
+                            () => deferred.resolve()
+                        );
+                } else {
+                    deferred.resolve();
+                }
+            }, () => {
+                deferred.reject();
+            });
+    } else {
+        deferred.reject();
     }
-    Q.all(promisesList)
-        .then(() => {
-            deferred.resolve();
-        }, () => {
-            deferred.reject();
-        });
+
     return deferred.promise;
 };
 
@@ -253,7 +265,7 @@ const migrate = (pathToMigrate) => {
             });
             dbRun(createMigrationQuery)
                 .then(() => {
-                    runDirQueries(migrationQueries)
+                    runDirQueries(migrationQueries, Object.keys(migrationQueries))
                         .then(() => {
                             deferred.resolve();
                         }, () => {
