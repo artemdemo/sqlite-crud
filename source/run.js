@@ -15,7 +15,7 @@ const dbInstance = require('./db-instance');
  * run('INSERT INTO table_name (name, description) VALUES (?, ?)', false, ['run-test', 'run-test description'])
  * ```
  */
-const run = (query, parameters, options = {}) => {
+const run = (query, parameters = null, options = {}) => {
     let deferred = Q.defer();
     const DB = dbInstance.getDB();
 

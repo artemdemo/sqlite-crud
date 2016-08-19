@@ -127,7 +127,7 @@ const queryOneRow = (query) => {
  * @param parameters {Array} array of parameters to the query (optional)
  * @returns {Promise}
  */
-const queryRows = (query, parameters) => {
+const queryRows = (query, parameters = null) => {
     let deferred = Q.defer();
     let DB = dbInstance.getDB();
     const callback = (err, rows) => {
