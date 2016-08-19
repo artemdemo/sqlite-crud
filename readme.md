@@ -202,15 +202,15 @@ DB.queryRows('SELECT * FROM ' + testTableName + ';')
 /**
  * Proxy function for run
  * @param query {String}
- * @param saveRun {Boolean} if `true` will always resolve promise
  * @param parameters {Array} array of parameters to th query
+ * @param options {Object}
+ * @param options.saveRun {Boolean} if `true` will always resolve promise
  */
 ```
 
 ```javascript
 DB.run(
     'INSERT INTO table_name (name, description) VALUES (?, ?)',
-    false,
     ['run-test', 'run-test description']
 ).then((result) => {
     deferred.resolve(result.lastID);

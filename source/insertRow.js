@@ -39,34 +39,39 @@ const insertRow = (tableName, data) => {
     });
     query += ')';
 
-    // console.log(chalk.blue('Query:'), query);
+    //console.log(chalk.blue('Query:'), query);
 
-    let stmt = DB.prepare(query);
-    stmt.run(columnValues, function(error) {
-        if (!error) {
-            /**
-             * `this` object will contain:
-             * {
-             *     sql: 'INSERT INTO tableName (name,vacancy_id) VALUES (?,?)',
-             *     lastID: 11,
-             *     changes: 1
-             * }
-             */
-            deferred.resolve({ id: this.lastID });
-        } else {
-            //console.log(chalk.red.bold('[insertToTable error]'), error);
-            //console.log(chalk.red.bold('[insertToTable data]'), data)
-            /**
-             * In case of UNIQUE constraint failed
-             * `error.errorno` will be 19
-             */
-            deferred.reject({
-                errno: error.errno,
-                code: error.code
-            });
-        }
-    });
-    stmt.finalize();
+    try {
+        let stmt = DB.prepare(query);
+        stmt.run(columnValues, function(error) {
+            if (!error) {
+                /**
+                 * `this` object will contain:
+                 * {
+                 *     sql: 'INSERT INTO tableName (name,vacancy_id) VALUES (?,?)',
+                 *     lastID: 11,
+                 *     changes: 1
+                 * }
+                 */
+                deferred.resolve({ id: this.lastID });
+            } else {
+                //console.log(chalk.red.bold('[insertRow error]'), error);
+                //console.log(chalk.red.bold('[insertRow data]'), data)
+                /**
+                 * In case of UNIQUE constraint failed
+                 * `error.errorno` will be 19
+                 */
+                deferred.reject({
+                    errno: error.errno,
+                    code: error.code
+                });
+            }
+        });
+        stmt.finalize();
+    } catch(e) {
+        console.log(chalk.red.bold('[insertRow error]'), e);
+        deferred.reject(e);
+    }
     return deferred.promise;
 };
 

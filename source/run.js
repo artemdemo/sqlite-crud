@@ -6,15 +6,16 @@ const dbInstance = require('./db-instance');
 /**
  * Proxy function for run
  * @param query {String}
- * @param saveRun {Boolean} if `true` will always resolve promise
- * @param parameters {Array} array of parameters to th query
+ * @param parameters {Array} array of parameters to the query
+ * @param options {Object}
+ * @param options.saveRun {Boolean} if `true` will always resolve promise
  * @example
  * In case you are passing parameters, function should be used in following way:
  * ```
  * run('INSERT INTO table_name (name, description) VALUES (?, ?)', false, ['run-test', 'run-test description'])
  * ```
  */
-const run = (query, saveRun, parameters) => {
+const run = (query, parameters, options = {}) => {
     let deferred = Q.defer();
     const DB = dbInstance.getDB();
 
@@ -31,7 +32,7 @@ const run = (query, saveRun, parameters) => {
      */
     const callback = function (error) {
         if (error) {
-            if (saveRun) {
+            if (options.saveRun) {
                 deferred.resolve(error);
             } else {
                 deferred.reject(error);
@@ -42,7 +43,8 @@ const run = (query, saveRun, parameters) => {
             deferred.resolve(this);
         }
     }
-    if (parameters) {
+
+    if (parameters && Array.isArray(parameters)) {
         DB.run(query, parameters, callback);
     } else {
         DB.run(query, callback);

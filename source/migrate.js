@@ -85,7 +85,7 @@ const runMigrationQueries = (queries, fileName) => {
 
                 // Run migration for given query from migration json file
                 queries.forEach((query) => {
-                    const queryPromise = dbRun(query, true)
+                    const queryPromise = dbRun(query, null, {saveRun: true})
                         .then(() => {
                         }, (error) => {
                             if (verbose.getVerbose()) {
@@ -236,7 +236,7 @@ const migrate = (pathToMigrate) => {
                     }
                 }
             });
-            dbRun(createMigrationQuery, false)
+            dbRun(createMigrationQuery)
                 .then(() => {
                     runDirQueries(migrationQueries)
                         .then(() => {
@@ -251,7 +251,7 @@ const migrate = (pathToMigrate) => {
         } else {
             const queriesArr = getMigrateQueriesFromFile(pathToMigrate);
             const fileName = path.basename(pathToMigrate);
-            dbRun(createMigrationQuery, false)
+            dbRun(createMigrationQuery)
                 .then(() => {
                     runMigrationQueries(queriesArr, fileName)
                         .then(() => {
