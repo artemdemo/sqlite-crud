@@ -1,0 +1,6 @@
+{
+    "queries": [
+        "CREATE TABLE seeds (id INTEGER PRIMARY KEY AUTOINCREMENT, name CHAR (100), descr TEXT);",
+        "INSERT INTO seeds ('name', 'descr') VALUES ('seed 01', 'seed descr - 01'), ('seed 02', 'seed descr - 02'), ('seed 03', 'seed descr - 03'), ('seed 04', 'seed descr - 04');"
+    ]
+}

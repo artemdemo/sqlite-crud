@@ -67,6 +67,34 @@ const checkMigration = (fileName) => {
     return deferred.promise;
 };
 
+/**
+ * Recursively run queries step by step.
+ * @param queries {Array}
+ * @param queryId {Number}
+ */
+const runQueriesStepwise = (queries, queryId = 0) => {
+    let deferred = Q.defer();
+
+    if (queries[queryId]) {
+        dbRun(queries[queryId], null, {saveRun: true})
+            .then((result) => {
+
+                if (queries[queryId + 1]) {
+                    runQueriesStepwise(queries, queryId + 1)
+                        .then(
+                            () => deferred.resolve(),
+                            () => deferred.resolve()
+                        );
+                } else {
+                    deferred.resolve();
+                }
+            });
+    } else {
+        deferred.reject();
+    }
+
+    return deferred.promise;
+}
 
 /**
  * Run migration queries and add them to migrations table
@@ -81,21 +109,8 @@ const runMigrationQueries = (queries, fileName) => {
         // Check that migration file is not exists in the DB
         checkMigration(fileName)
             .then(() => {
-                let queryPromises = [];
 
-                // Run migration for given query from migration json file
-                queries.forEach((query) => {
-                    const queryPromise = dbRun(query, null, {saveRun: true})
-                        .then(() => {
-                        }, (error) => {
-                            if (verbose.getVerbose()) {
-                                console.log(chalk.red.bold('[Migration query run error]', 'Given query: ' + query));
-                                console.log(error);
-                            }
-                        });
-                    queryPromises.push(queryPromise)
-                });
-                Q.all(queryPromises)
+                runQueriesStepwise(queries)
                     .then(() => {
                         addMigrationInfo(fileName)
                             .then(() => {
@@ -103,15 +118,15 @@ const runMigrationQueries = (queries, fileName) => {
                             }, () => {
                                 deferred.reject();
                             });
-                    }, () => {
-                        deferred.reject();
-                    })
+                        }, () => {
+                            deferred.reject();
+                        });
             }, () => {
                 deferred.reject();
             });
     } else {
         if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[Migration queries error]', 'Query read error'));
+            console.log(chalk.red.bold('[Migration queries error]', 'Query read error - `queries` variable should be an Array'));
             console.log(queries);
         }
         deferred.reject();

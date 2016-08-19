@@ -410,9 +410,12 @@ describe('Migrate folder:', () => {
                         case '20150618_dummy04-05_tables.json':
                             fileNamesCounter++;
                             break;
+                        case '20150619_seeds_table.json':
+                            fileNamesCounter++;
+                            break;
                     }
                 });
-                expect(fileNamesCounter).toBe(2);
+                expect(fileNamesCounter).toBe(3);
                 done();
             }, () => {
                 done();
@@ -463,5 +466,16 @@ describe('Migrate folder:', () => {
             done();
             throw new Error('Row is not added - error in DB');
         });
+    });
+
+    it('Seeds added to the table', (done) => {
+        DB.queryRows('SELECT * FROM seeds;')
+            .then((rows) => {
+                expect(rows.length).toBe(4);
+                done();
+            }, () => {
+                done();
+                throw new Error('Error in DB');
+            });
     });
 });
