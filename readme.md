@@ -3,7 +3,8 @@
 Simple module for common CRUD operations with SQLite database.
 
 ```javascript
-const DB = require('sqlite-crud')('./server/your-file.db');
+const DB = require('sqlite-crud');
+DB.connectToDB('./server/your-file.db');
 ```
 
 **Dependencies**
@@ -26,8 +27,8 @@ const myDB = DB.getDB();
 ```javascript
 /**
  * Insert row into given table
- * @param tableName {string}
- * @param data {object}
+ * @param tableName {String}
+ * @param data {Object}
  */
 DB.insertRow(tableName, data);
 ```
@@ -55,8 +56,8 @@ DB.insertRow('tasks', {
 ```javascript
 /**
  * Update table row
- * @param tableName {string}
- * @param data {object}
+ * @param tableName {String}
+ * @param data {Object}
  * @param where {Array}
  *  [
  *      {
@@ -126,7 +127,7 @@ DB.getRows('tasks', [{
 ```javascript
 /**
  * Delete rows from table
- * @param tableName {string}
+ * @param tableName {String}
  * @param where {Array}
  *  [
  *      {
@@ -158,19 +159,19 @@ DB.deleteRows('tasks', [{
 ```javascript
 /**
  * Return first result row
- * @param query {string}
+ * @param query {String}
  */
 DB.queryOneRow(query);
 ```
 
 ```javascript
-DB.queryOneRow('SELECT * FROM ' + testTableName + ';')
+DB.queryOneRow('SELECT * FROM table_name;')
     .then((result) => {
         // result - will be an object
         // If there is no match will be undefined
         deferred.resolve(result);
     }, () => {
-        console.log(chalk.red.bold('[getFromTable error]'), error);
+        console.log(chalk.red.bold('[error]'), error);
         deferred.reject();
     });
 ```
@@ -180,19 +181,19 @@ DB.queryOneRow('SELECT * FROM ' + testTableName + ';')
 ```javascript
 /**
  * Return all results (rows) for given query
- * @param query {string}
+ * @param query {String}
  * @param parameters {Array} array of parameters to th query (optional)
  */
-DB.queryRows(query);
+DB.queryRows(query, parameters);
 ```
 
 ```javascript
-DB.queryRows('SELECT * FROM ' + testTableName + ';')
+DB.queryRows('SELECT * FROM table_name WHERE name = ?;', ['Row name'])
     .then((rows) => {
         // rows - will be an array
         deferred.resolve(rows);
     }, (error) => {
-        console.log(chalk.red.bold('[getAll error]'), error);
+        console.log(chalk.red.bold('[error]'), error);
         deferred.reject();
     });
 ```
