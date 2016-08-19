@@ -19,7 +19,7 @@ const connectToDB = (dbPath) => {
     dbFile = fs.existsSync(dbFileName);
 
     if(!dbFile) {
-        console.log(chalk.yellow('[Info]'),'There is no DB. Creating new empty file');
+        console.log(chalk.yellow('[Info]'), `There is no DB. Creating new empty file: ${dbFileName}`);
         fs.openSync(dbFileName, "w");
     }
 };
