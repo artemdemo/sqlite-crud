@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/artemdemo/sqlite-crud#readme",
   "devDependencies": {
+    "eslint": "^3.4.0",
+    "eslint-config-artem": "git+https://github.com/artemdemo/eslint-config-artem.git",
     "jasmine-node": "^1.14.5"
   },
   "dependencies": {

@@ -1,3 +1,4 @@
+/* eslint-disable no-console, strict*/
 /**
  * Establishing connection to the database
  *
@@ -34,7 +35,7 @@ const verbose = require('./source/verbose');
 const updateRow = (tableName, data, where) => {
     let deferred = Q.defer();
     let DB = dbInstance.getDB();
-    let query = 'UPDATE ' + tableName + ' SET ';
+    let query = `UPDATE ${tableName} SET `;
     let columns = [];
     let columnValues = [];
     if (!tableName) {
@@ -168,7 +169,7 @@ const queryRows = (query, parameters = null) => {
 const deleteRows = (tableName, where) => {
     let deferred = Q.defer();
     let DB = dbInstance.getDB();
-    let query = 'DELETE FROM ' + tableName;
+    let query = `DELETE FROM ${tableName}`;
     let columnValues = [];
     if (!tableName) {
         throw new Error('`tableName` is not provided');
@@ -177,7 +178,7 @@ const deleteRows = (tableName, where) => {
         throw new Error('`where` is not provided');
     } else if (!where.hasOwnProperty('length')) {
         throw new Error('`where` should be an array');
-    } else if (where.length == 0) {
+    } else if (where.length === 0) {
         throw new Error('There is no data in `where` object');
     }
 
@@ -230,5 +231,5 @@ module.exports = {
     queryRows,
     run,
     migrate,
-    setVerbose: verbose.setVerbose
+    setVerbose: verbose.setVerbose,
 };

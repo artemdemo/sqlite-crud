@@ -1,3 +1,4 @@
+/* eslint-disable no-console, strict*/
 'use strict';
 
 const Q = require('q');

@@ -1,3 +1,4 @@
+/* eslint-disable no-console, strict*/
 'use strict';
 
 const path = require('path');
@@ -22,7 +23,7 @@ const addMigrationInfo = (fileName) => {
     let deferred = Q.defer();
 
     insertRow(migrationsTableName, {
-        migration: fileName
+        migration: fileName,
     }).then((result) => {
         deferred.resolve();
     }, () => {
@@ -48,15 +49,14 @@ const checkMigration = (fileName) => {
     getRows(migrationsTableName, [{
         column: 'migration',
         comparator: '=',
-        value: fileName
+        value: fileName,
     }])
         .then((result) => {
             if (result.length === 0) {
                 deferred.resolve();
             } else {
                 if (verbose.getVerbose()) {
-                    console.log(chalk.red.bold('[Migration]', 'This file already migrated: ' + fileName));
-                    console.log(error);
+                    console.log(chalk.red.bold('[Migration]', `This file already migrated: ${fileName}`));
                 }
                 deferred.reject();
             }
@@ -193,7 +193,7 @@ const getMigrateQueriesFromFile = (pathToFile) => {
 
     if (fileExtension !== '.json') {
         if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[File format error]'), 'Given file is not json: ' + pathToFile);
+            console.log(chalk.red.bold('[File format error]'), `Given file is not json: ${pathToFile}`);
         }
         return;
     }
@@ -214,7 +214,7 @@ const getMigrateQueriesFromFile = (pathToFile) => {
         migrationJson = JSON.parse(jsonString);
     } catch (e) {
         if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[Migration JSON error]'), 'Given string can\'t be parsed: ' + jsonString);
+            console.log(chalk.red.bold('[Migration JSON error]'), `Given string can't be parsed: ${jsonString}`);
             console.log(e);
         }
         return;
@@ -254,7 +254,7 @@ const migrate = (pathToMigrate) => {
             return deferred.promise;
         }
         if (pathStats.isDirectory()) {
-            let migrationQueries = {};
+            const migrationQueries = {};
             fs.readdirSync(pathToMigrate).forEach((file) => {
                 if(file.substr(-5) === '.json') {
                     const queriesArr = getMigrateQueriesFromFile(path.join(pathToMigrate, file));

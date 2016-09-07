@@ -42,7 +42,7 @@ const run = (query, parameters = null, options = {}) => {
             // changes - in case of UPDATE or DELETE
             deferred.resolve(this);
         }
-    }
+    };
 
     if (parameters && Array.isArray(parameters)) {
         DB.run(query, parameters, callback);

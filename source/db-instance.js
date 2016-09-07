@@ -1,3 +1,4 @@
+/* eslint-disable no-console, strict*/
 'use strict';
 
 const fs = require('fs');
@@ -20,7 +21,7 @@ const connectToDB = (dbPath) => {
 
     if(!dbFile) {
         console.log(chalk.yellow('[Info]'), `There is no DB. Creating new empty file: ${dbFileName}`);
-        fs.openSync(dbFileName, "w");
+        fs.openSync(dbFileName, 'w');
     }
 };
 

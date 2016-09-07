@@ -1,3 +1,4 @@
+/* eslint-disable no-console, strict*/
 'use strict';
 
 let verbose = true;
@@ -7,7 +8,7 @@ let verbose = true;
  * @param newVerbose {Boolean}
  */
 const setVerbose = (newVerbose) => {
-    verbose = newVerbose
+    verbose = newVerbose;
 };
 
 const getVerbose = () => {
@@ -16,5 +17,5 @@ const getVerbose = () => {
 
 module.exports = {
     setVerbose,
-    getVerbose
+    getVerbose,
 };
