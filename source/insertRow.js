@@ -12,23 +12,23 @@ const dbInstance = require('./db-instance');
  */
 const insertRow = (tableName, data) => {
     let deferred = Q.defer();
-    let DB = dbInstance.getDB();
-    let query = 'INSERT INTO ' + tableName + ' ';
-    let columns = [];
-    let columnValues = [];
+    const DB = dbInstance.getDB();
+    let query = `INSERT INTO ${tableName} `;
+    const columns = [];
+    const columnValues = [];
     if (!tableName) {
         throw new Error('tableName is not provided');
     }
     if (!data) {
         throw new Error('data object is not provided');
     }
-    for (var key in data) {
+    for (const key in data) {
         if (data.hasOwnProperty(key)) {
             columns.push(key);
             columnValues.push(data[key]);
         }
     }
-    if (columns.length == 0) {
+    if (columns.length === 0) {
         throw new Error('There is no columns in data object');
     }
     query += '(' + columns.join(',') + ') VALUES (';
@@ -69,7 +69,7 @@ const insertRow = (tableName, data) => {
             }
         });
         stmt.finalize();
-    } catch(e) {
+    } catch (e) {
         console.log(chalk.red.bold('[insertRow error]'), e);
         deferred.reject(e);
     }

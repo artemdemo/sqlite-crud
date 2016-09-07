@@ -29,7 +29,6 @@ const addMigrationInfo = (fileName) => {
     }, () => {
         if (verbose.getVerbose()) {
             console.log(chalk.red.bold('[Migration]', 'Error while adding migration record'));
-            console.log(error);
         }
         deferred.reject();
     });
@@ -126,7 +125,9 @@ const runMigrationQueries = (queries, fileName) => {
             });
     } else {
         if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[Migration queries error]', 'Query read error - `queries` variable should be an Array'));
+            console.log(
+                chalk.red.bold('[Migration queries error]', 'Query read error - `queries` variable should be an Array')
+            );
             console.log(queries);
         }
         deferred.reject();
