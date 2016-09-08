@@ -1,3 +1,6 @@
+## 2.0 (2016-09-08)
+* Replaced `Q` with `new Promise()`
+
 ## 1.4 (2016-08-21)
 * Run migration queries stepwise
 * Added parameters to `DB.run()` and `DB.queryRows()`

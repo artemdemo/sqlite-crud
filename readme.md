@@ -40,14 +40,14 @@ DB.insertRow('tasks', {
         added: now.format('YYYY-MM-DD HH:mm:ss'),
         updated: now.format('YYYY-MM-DD HH:mm:ss')
     }).then((result) => {
-        deferred.resolve({
+        resolve({
             id: result.id,
             added: now.format('YYYY-MM-DD HH:mm:ss'),
             updated: now.format('YYYY-MM-DD HH:mm:ss')
         });
     }, (error) => {
         console.log(chalk.red.bold('[error]'), error);
-        deferred.reject();
+        reject();
     });
 ```
 
@@ -81,10 +81,10 @@ DB.updateRow('tasks', {
         comparator: '=',
         value: task.id
     }]).then(() => {
-        deferred.resolve();
+        resolve();
     }, (error) => {
         console.log(chalk.red.bold('[error]'), error);
-        deferred.reject();
+        reject();
     });
 ```
 
@@ -115,10 +115,10 @@ DB.getRows('tasks', [{
         value: id
     }])
         .then((rows) => {
-            deferred.resolve(rows);
+            resolve(rows);
         }, () => {
             console.log(chalk.red.bold('[error]'), error);
-            deferred.reject();
+            reject();
         });
 ```
 
@@ -147,10 +147,10 @@ DB.deleteRows('tasks', [{
         comparator: '=',
         value: taskId
     }]).then(() => {
-        deferred.resolve();
+        resolve();
     }, (error) => {
         console.log(chalk.red.bold('[deleteTask error]'), error);
-        deferred.reject();
+        reject();
     });
 ```
 
@@ -169,10 +169,10 @@ DB.queryOneRow('SELECT * FROM table_name;')
     .then((result) => {
         // result - will be an object
         // If there is no match will be undefined
-        deferred.resolve(result);
+        resolve(result);
     }, () => {
         console.log(chalk.red.bold('[error]'), error);
-        deferred.reject();
+        reject();
     });
 ```
 
@@ -191,10 +191,10 @@ DB.queryRows(query, parameters);
 DB.queryRows('SELECT * FROM table_name WHERE name = ?;', ['Row name'])
     .then((rows) => {
         // rows - will be an array
-        deferred.resolve(rows);
+        resolve(rows);
     }, (error) => {
         console.log(chalk.red.bold('[error]'), error);
-        deferred.reject();
+        reject();
     });
 ```
 
@@ -215,10 +215,10 @@ DB.run(
     'INSERT INTO table_name (name, description) VALUES (?, ?)',
     ['run-test', 'run-test description']
 ).then((result) => {
-    deferred.resolve(result.lastID);
+    resolve(result.lastID);
 }, (error) => {
     console.log(chalk.red.bold('[run error]'), error);
-    deferred.reject();
+    reject();
 });
 ```
 

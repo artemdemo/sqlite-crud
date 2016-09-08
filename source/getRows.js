@@ -1,7 +1,6 @@
 /* eslint-disable no-console, strict*/
 'use strict';
 
-const Q = require('q');
 const dbInstance = require('./db-instance');
 const verbose = require('./verbose');
 
@@ -19,9 +18,8 @@ const verbose = require('./verbose');
  *  ]
  * @returns {Promise}
  */
-const getRows = (tableName, where) => {
-    let deferred = Q.defer();
-    let DB = dbInstance.getDB();
+const getRows = (tableName, where) => new Promise((resolve, reject) => {
+    const DB = dbInstance.getDB();
     let query = `SELECT * FROM ${tableName}`;
     const whereValues = [];
     if (!tableName) {
@@ -53,13 +51,11 @@ const getRows = (tableName, where) => {
             if (verbose.getVerbose()) {
                 console.log(chalk.red.bold('[getRows error]'), error);
             }
-            deferred.reject();
+            reject();
         } else {
-            deferred.resolve(rows);
+            resolve(rows);
         }
     });
-
-    return deferred.promise;
-};
+});
 
 module.exports = getRows;

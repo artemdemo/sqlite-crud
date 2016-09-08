@@ -1,7 +1,6 @@
 /* eslint-disable no-console, strict*/
 'use strict';
 
-const Q = require('q');
 const dbInstance = require('./db-instance');
 
 /**
@@ -10,8 +9,7 @@ const dbInstance = require('./db-instance');
  * @param data {Object}
  * @returns {Promise}
  */
-const insertRow = (tableName, data) => {
-    let deferred = Q.defer();
+const insertRow = (tableName, data) => new Promise((resolve, reject) => {
     const DB = dbInstance.getDB();
     let query = `INSERT INTO ${tableName} `;
     const columns = [];
@@ -40,10 +38,10 @@ const insertRow = (tableName, data) => {
     });
     query += ')';
 
-    //console.log(chalk.blue('Query:'), query);
+    // console.log(chalk.blue('Query:'), query);
 
     try {
-        let stmt = DB.prepare(query);
+        const stmt = DB.prepare(query);
         stmt.run(columnValues, function(error) {
             if (!error) {
                 /**
@@ -54,15 +52,15 @@ const insertRow = (tableName, data) => {
                  *     changes: 1
                  * }
                  */
-                deferred.resolve({ id: this.lastID });
+                resolve({ id: this.lastID });
             } else {
-                //console.log(chalk.red.bold('[insertRow error]'), error);
-                //console.log(chalk.red.bold('[insertRow data]'), data)
+                // console.log(chalk.red.bold('[insertRow error]'), error);
+                // console.log(chalk.red.bold('[insertRow data]'), data)
                 /**
                  * In case of UNIQUE constraint failed
                  * `error.errorno` will be 19
                  */
-                deferred.reject({
+                reject({
                     errno: error.errno,
                     code: error.code
                 });
@@ -71,9 +69,8 @@ const insertRow = (tableName, data) => {
         stmt.finalize();
     } catch (e) {
         console.log(chalk.red.bold('[insertRow error]'), e);
-        deferred.reject(e);
+        reject(e);
     }
-    return deferred.promise;
-};
+});
 
 module.exports = insertRow;

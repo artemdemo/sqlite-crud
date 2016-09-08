@@ -1,6 +1,6 @@
+/* eslint-disable no-console, strict*/
 'use strict';
 
-const Q = require('q');
 const dbInstance = require('./db-instance');
 
 /**
@@ -12,11 +12,10 @@ const dbInstance = require('./db-instance');
  * @example
  * In case you are passing parameters, function should be used in following way:
  * ```
- * run('INSERT INTO table_name (name, description) VALUES (?, ?)', false, ['run-test', 'run-test description'])
+ * run('INSERT INTO table_name (name, description) VALUES (?, ?)', ['run-test', 'run-test description'])
  * ```
  */
-const run = (query, parameters = null, options = {}) => {
-    let deferred = Q.defer();
+const run = (query, parameters = null, options = {}) => new Promise((resolve, reject) => {
     const DB = dbInstance.getDB();
 
     /*
@@ -30,17 +29,17 @@ const run = (query, parameters = null, options = {}) => {
      *
      * @source https://github.com/mapbox/node-sqlite3/wiki/API#databaserunsql-param--callback
      */
-    const callback = function (error) {
+    const callback = function(error) {
         if (error) {
             if (options.saveRun) {
-                deferred.resolve(error);
+                resolve(error);
             } else {
-                deferred.reject(error);
+                reject(error);
             }
         } else {
             // lastID - in case of INSERT
             // changes - in case of UPDATE or DELETE
-            deferred.resolve(this);
+            resolve(this);
         }
     };
 
@@ -49,8 +48,6 @@ const run = (query, parameters = null, options = {}) => {
     } else {
         DB.run(query, callback);
     }
-
-    return deferred.promise;
-};
+});
 
 module.exports = run;

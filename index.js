@@ -7,7 +7,6 @@
 
 'use strict';
 
-const Q = require('q');
 const chalk = require('chalk');
 const dbInstance = require('./source/db-instance');
 const migrate = require('./source/migrate');
@@ -32,12 +31,11 @@ const verbose = require('./source/verbose');
  *  ]
  * @returns {Promise}
  */
-const updateRow = (tableName, data, where) => {
-    let deferred = Q.defer();
-    let DB = dbInstance.getDB();
+const updateRow = (tableName, data, where) => new Promise((resolve, reject) => {
+    const DB = dbInstance.getDB();
     let query = `UPDATE ${tableName} SET `;
-    let columns = [];
-    let columnValues = [];
+    const columns = [];
+    const columnValues = [];
     if (!tableName) {
         throw new Error('`tableName` is not provided');
     }
@@ -48,21 +46,21 @@ const updateRow = (tableName, data, where) => {
         throw new Error('`where` is not provided');
     } else if (!where.hasOwnProperty('length')) {
         throw new Error('`where` should be an array');
-    } else if (where.length == 0) {
+    } else if (where.length === 0) {
         throw new Error('There is no data in `where` object');
     }
-    var key;
-    for (key in data) {
+
+    for (const key in data) {
         if (data.hasOwnProperty(key)) {
             columns.push(key);
             columnValues.push(data[key]);
         }
     }
-    if (columns.length == 0) {
+    if (columns.length === 0) {
         throw new Error('There is no columns in `data` object');
     }
     columns.forEach((column, i) => {
-        query += column + ' = ?';
+        query += `${column} = ?`;
         if (i < columns.length - 1) {
             query += ', ';
         }
@@ -71,7 +69,7 @@ const updateRow = (tableName, data, where) => {
     query += ' WHERE ';
 
     where.forEach((whereItem, i) => {
-        query += whereItem.column + ' ' + whereItem.comparator + ' ?';
+        query += `${whereItem.column} ${whereItem.comparator} ?`;
         if (i < where.length - 1) {
             query += ' AND ';
         }
@@ -86,26 +84,23 @@ const updateRow = (tableName, data, where) => {
             if (verbose.getVerbose()) {
                 console.log(chalk.red.bold('[updateInTable error]'), error);
             }
-            deferred.reject();
+            reject();
         } else {
             if (verbose.getVerbose()) {
                 console.log(chalk.blue('Updated '), where);
             }
-            deferred.resolve();
+            resolve();
         }
     });
-
-    return deferred.promise;
-};
+});
 
 /**
  * Return first result row
  * @param query {String}
  * @returns {Promise}
  */
-const queryOneRow = (query) => {
-    let deferred = Q.defer();
-    let DB = dbInstance.getDB();
+const queryOneRow = (query) => new Promise((resolve, reject) => {
+    const DB = dbInstance.getDB();
 
     DB.get(query, (err, row) => {
         if (err) {
@@ -113,14 +108,12 @@ const queryOneRow = (query) => {
                 console.log(chalk.red.bold('[getFromTable error]'), err);
                 console.log('QUERY was: ', query);
             }
-            deferred.reject();
+            reject();
         } else {
-            deferred.resolve(row);
+            resolve(row);
         }
     });
-
-    return deferred.promise;
-};
+});
 
 /**
  * Return all rows that fit to the given query
@@ -128,18 +121,17 @@ const queryOneRow = (query) => {
  * @param parameters {Array} array of parameters to the query (optional)
  * @returns {Promise}
  */
-const queryRows = (query, parameters = null) => {
-    let deferred = Q.defer();
-    let DB = dbInstance.getDB();
+const queryRows = (query, parameters = null) => new Promise((resolve, reject) => {
+    const DB = dbInstance.getDB();
     const callback = (err, rows) => {
         if (err) {
             if (verbose.getVerbose()) {
                 console.log(chalk.red.bold('[getAll error]'), err);
                 console.log('QUERY was: ', query);
             }
-            deferred.reject();
+            reject();
         } else {
-            deferred.resolve(rows);
+            resolve(rows);
         }
     };
 
@@ -148,9 +140,7 @@ const queryRows = (query, parameters = null) => {
     } else {
         DB.all(query, callback);
     }
-
-    return deferred.promise;
-};
+});
 
 /**
  * Delete rows from table
@@ -166,11 +156,10 @@ const queryRows = (query, parameters = null) => {
  *  ]
  * @returns {Promise}
  */
-const deleteRows = (tableName, where) => {
-    let deferred = Q.defer();
-    let DB = dbInstance.getDB();
+const deleteRows = (tableName, where) => new Promise((resolve, reject) => {
+    const DB = dbInstance.getDB();
     let query = `DELETE FROM ${tableName}`;
-    let columnValues = [];
+    const columnValues = [];
     if (!tableName) {
         throw new Error('`tableName` is not provided');
     }
@@ -185,7 +174,7 @@ const deleteRows = (tableName, where) => {
     query += ' WHERE ';
 
     where.forEach((whereItem, i) => {
-        query += whereItem.column + ' ' + whereItem.comparator + ' ?';
+        query += `${whereItem.column} ${whereItem.comparator} ?`;
         if (i < where.length - 1) {
             query += ' AND ';
         }
@@ -195,7 +184,7 @@ const deleteRows = (tableName, where) => {
     // console.log(chalk.blue('Query:'), query);
     // console.log('columnValues', columnValues);
 
-    DB.serialize(function() {
+    DB.serialize(() => {
         DB.run('PRAGMA foreign_keys = ON;');
         DB.run(query, columnValues, (error) => {
             if (error) {
@@ -203,18 +192,16 @@ const deleteRows = (tableName, where) => {
                     console.log(chalk.red.bold('[deleteRows error]'), error);
                     console.log(chalk.blue('Query was:'), query);
                 }
-                deferred.reject();
+                reject();
             } else {
                 if (verbose.getVerbose()) {
                     console.log(chalk.blue('Deleted '), where);
                 }
-                deferred.resolve();
+                resolve();
             }
         });
     });
-
-    return deferred.promise;
-};
+});
 
 const connectToDB = (dbPath) => {
     dbInstance.connectToDB(dbPath);
