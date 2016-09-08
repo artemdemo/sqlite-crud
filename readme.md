@@ -9,8 +9,17 @@ DB.connectToDB('./server/your-file.db');
 
 **Dependencies**
 
-* q
 * sqlite3
+
+## How to use
+I haven't published this package in npm, therefore you'll need to add github link as source to you `package.json`:
+
+```javascript
+"dependencies": {
+    // ...
+    "sqlite-crud": "git+https://github.com/artemdemo/sqlite-crud.git#2.0"
+}
+```
 
 ## API
 
