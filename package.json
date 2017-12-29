@@ -1,6 +1,6 @@
 {
   "name": "sqlite-crud",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "List of functions for common CRUD operations with SQLite database",
   "main": "index.js",
   "scripts": {
