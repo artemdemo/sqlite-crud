@@ -1,3 +1,6 @@
 {
-  "extends": "artem"
+  "extends": "artem",
+  "plugins": [
+    "import"
+  ]
 }

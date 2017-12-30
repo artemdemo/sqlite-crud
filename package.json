@@ -17,12 +17,14 @@
   },
   "homepage": "https://github.com/artemdemo/sqlite-crud#readme",
   "devDependencies": {
-    "eslint": "^3.4.0",
-    "eslint-config-artem": "git+https://github.com/artemdemo/eslint-config-artem.git",
+    "eslint": "^4.14.0",
+    "eslint-config-artem": "git+https://github.com/artemdemo/eslint-config-artem.git#3.0.0",
+    "eslint-plugin-import": "^2.8.0",
     "jasmine-node": "^1.14.5"
   },
   "dependencies": {
     "chalk": "^1.1.3",
+    "eslint-config-airbnb-base": "^12.1.0",
     "sqlite3": "^3.1.3"
   }
 }
