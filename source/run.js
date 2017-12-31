@@ -1,5 +1,3 @@
-/* eslint-disable no-console, strict*/
-'use strict';
 
 const dbInstance = require('./db-instance');
 

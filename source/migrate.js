@@ -1,8 +1,8 @@
+const debug = require('debug')('sqlite-crud:migrate');
 const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs');
 const dbRun = require('./run');
-const verbose = require('./verbose');
 const insertRow = require('./insertRow');
 const getRows = require('./getRows');
 
@@ -15,17 +15,8 @@ const createMigrationQuery = `CREATE TABLE IF NOT EXISTS ${migrationsTableName} 
  * @param fileName {String} - file name of the migration
  * @returns {promise}
  */
-const addMigrationInfo = (fileName) => new Promise((resolve, reject) => {
-    insertRow(migrationsTableName, {
-        migration: fileName,
-    }).then(() => {
-        resolve();
-    }, () => {
-        if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[Migration]', 'Error while adding migration record'));
-        }
-        reject();
-    });
+const addMigrationInfo = fileName => insertRow(migrationsTableName, {
+    migration: fileName,
 });
 
 
@@ -34,87 +25,55 @@ const addMigrationInfo = (fileName) => new Promise((resolve, reject) => {
  * @param fileName {String} - file name of the migration
  * @returns {promise}
  */
-const checkMigration = (fileName) => new Promise((resolve, reject) => {
-    getRows(migrationsTableName, [{
+const checkMigration = (fileName) => {
+    return getRows(migrationsTableName, [{
         column: 'migration',
         comparator: '=',
         value: fileName,
     }])
         .then((result) => {
-            if (result.length === 0) {
-                resolve();
-            } else {
-                if (verbose.getVerbose()) {
-                    console.log(chalk.red.bold('[Migration]', `This file already migrated: ${fileName}`));
-                }
-                reject();
+            if (result.length > 0) {
+                throw new Error(`This file already migrated: ${fileName}`);
             }
-        }, () => {
-            reject();
         });
-});
+};
 
 /**
  * Recursively run queries step by step.
  * @param queries {Array}
  * @param queryId {Number}
  */
-const runQueriesStepwise = (queries, queryId = 0) => new Promise((resolve, reject) => {
+const runQueriesStepwise = (queries, queryId = 0) => {
     if (queries[queryId]) {
-        dbRun(queries[queryId], null, {saveRun: true})
+        return dbRun(queries[queryId], null, {saveRun: true})
             .then(() => {
                 if (queries[queryId + 1]) {
-                    runQueriesStepwise(queries, queryId + 1)
-                        .then(
-                            () => resolve(),
-                            () => resolve()
-                        );
-                } else {
-                    resolve();
+                    return runQueriesStepwise(queries, queryId + 1);
                 }
+                return Promise.resolve();
             });
-    } else {
-        reject();
     }
-});
+    return Promise.reject();
+};
 
 /**
  * Run migration queries and add them to migrations table
  * @param queries {Array}
  * @param fileName {String}
- * @returns {promise}
  */
-const runMigrationQueries = (queries, fileName) => new Promise((resolve, reject) => {
+const runMigrationQueries = (queries, fileName) => {
     if (Array.isArray(queries)) {
 
         // Check that migration file is not exists in the DB
-        checkMigration(fileName)
-            .then(() => {
-
-                runQueriesStepwise(queries)
-                    .then(() => {
-                        addMigrationInfo(fileName)
-                            .then(() => {
-                                resolve();
-                            }, () => {
-                                reject();
-                            });
-                    }, () => {
-                        reject();
-                    });
-            }, () => {
-                reject();
-            });
-    } else {
-        if (verbose.getVerbose()) {
-            console.log(
-                chalk.red.bold('[Migration queries error]', 'Query read error - `queries` variable should be an Array')
-            );
-            console.log(queries);
-        }
-        reject();
+        return checkMigration(fileName)
+            .then(() => runQueriesStepwise(queries))
+            .then(() => addMigrationInfo(fileName));
     }
-});
+    const err = 'Query read error - `queries` variable should be an Array';
+    debug(err);
+    debug(queries);
+    return Promise.reject(err);
+};
 
 /**
  * Recursively run queries of migration files
@@ -129,28 +88,19 @@ const runMigrationQueries = (queries, fileName) => new Promise((resolve, reject)
  * }
  * @param keys {Array}
  * @param keyId {Number}
- * @returns {promise}
  */
-const runDirQueries = (dirQueries, keys, keyId = 0) => new Promise((resolve, reject) => {
+const runDirQueries = (dirQueries, keys, keyId = 0) => {
     if (dirQueries[keys[keyId]]) {
-        runMigrationQueries(dirQueries[keys[keyId]], keys[keyId])
+        return runMigrationQueries(dirQueries[keys[keyId]], keys[keyId])
             .then(() => {
                 if (dirQueries[keys[keyId + 1]]) {
-                    runDirQueries(dirQueries, keys, keyId + 1)
-                        .then(
-                            () => resolve(),
-                            () => resolve()
-                        );
-                } else {
-                    resolve();
+                    return runDirQueries(dirQueries, keys, keyId + 1);
                 }
-            }, () => {
-                reject();
+                return Promise.resolve();
             });
-    } else {
-        reject();
     }
-});
+    return Promise.reject();
+};
 
 
 /**
@@ -170,31 +120,25 @@ const getMigrateQueriesFromFile = (pathToFile) => {
     const fileExtension = path.extname(fileName);
 
     if (fileExtension !== '.json') {
-        if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[File format error]'), `Given file is not json: ${pathToFile}`);
-        }
+        debug(`Given file is not json: ${pathToFile}`);
         return;
     }
 
     let jsonString = '';
     try {
         jsonString = fs.readFileSync(pathToFile, 'utf8');
-    } catch (e) {
-        if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[File reading error]'), pathToFile);
-            console.log(e);
-        }
+    } catch (err) {
+        debug(`File reading error ${pathToFile}`);
+        debug(err);
         return;
     }
 
     let migrationJson = null;
     try {
         migrationJson = JSON.parse(jsonString);
-    } catch (e) {
-        if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[Migration JSON error]'), `Given string can't be parsed: ${jsonString}`);
-            console.log(e);
-        }
+    } catch (err) {
+        debug(`Given string can't be parsed: ${jsonString}`);
+        debug(err);
         return;
     }
 
@@ -209,25 +153,10 @@ const getMigrateQueriesFromFile = (pathToFile) => {
  * @param pathToMigrate {String} - can be path to file or path to directory
  * @returns {promise}
  */
-const migrate = (pathToMigrate) => new Promise((resolve, reject) => {
-    const createMigrationTableError = (error) => {
-        if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[Migration]', 'Creating migrations table error'));
-            console.log(error);
-        }
-    };
-
+const migrate = pathToMigrate => new Promise((resolve, reject) => {
     if (typeof pathToMigrate === 'string') {
-        let pathStats;
-        try {
-            pathStats = fs.lstatSync(pathToMigrate);
-        } catch (e) {
-            if (verbose.getVerbose()) {
-                console.log(chalk.red.bold('[Path reading error]'), pathToMigrate);
-                console.log(e);
-            }
-            reject();
-        }
+        const pathStats = fs.lstatSync(pathToMigrate);
+
         if (pathStats.isDirectory()) {
             const migrationQueries = {};
             fs.readdirSync(pathToMigrate).forEach((file) => {
@@ -238,38 +167,27 @@ const migrate = (pathToMigrate) => new Promise((resolve, reject) => {
                     }
                 }
             });
+
             dbRun(createMigrationQuery)
-                .then(() => {
-                    runDirQueries(migrationQueries, Object.keys(migrationQueries))
-                        .then(() => {
-                            resolve();
-                        }, () => {
-                            reject();
-                        });
-                }, (error) => {
-                    createMigrationTableError(error);
-                    reject();
+                .then(() => runDirQueries(migrationQueries, Object.keys(migrationQueries)))
+                .then(() => resolve())
+                .catch((err) => {
+                    debug(err);
+                    reject(err);
                 });
         } else {
             const queriesArr = getMigrateQueriesFromFile(pathToMigrate);
             const fileName = path.basename(pathToMigrate);
             dbRun(createMigrationQuery)
-                .then(() => {
-                    runMigrationQueries(queriesArr, fileName)
-                        .then(() => {
-                            resolve();
-                        }, () => {
-                            reject();
-                        });
-                }, (error) => {
-                    createMigrationTableError(error);
-                    reject();
+                .then(() => runMigrationQueries(queriesArr, fileName))
+                .then(() => resolve())
+                .catch((err) => {
+                    debug(err);
+                    reject(err);
                 });
         }
     } else {
-        if (verbose.getVerbose()) {
-            console.log(chalk.red.bold('[Migration]', 'Given path is not string'));
-        }
+        debug('Given path is not string');
         reject();
     }
 });

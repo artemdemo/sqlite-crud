@@ -1,8 +1,5 @@
-/* eslint-disable no-console, strict*/
-'use strict';
-
+const debug = require('debug')('sqlite-crud:db-instance');
 const fs = require('fs');
-const chalk = require('chalk');
 const sqlite3 = require('sqlite3').verbose();
 
 let dbFileName;
@@ -20,7 +17,7 @@ const connectToDB = (dbPath) => {
     dbFile = fs.existsSync(dbFileName);
 
     if (!dbFile) {
-        console.log(chalk.yellow('[Info]'), `There is no DB. Creating new empty file: ${dbFileName}`);
+        debug(`There is no DB. Creating new empty file: ${dbFileName}`);
         fs.openSync(dbFileName, 'w');
     }
 };

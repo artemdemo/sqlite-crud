@@ -1,19 +1,15 @@
-/* eslint-disable no-console, strict*/
 /**
  * Establishing connection to the database
  *
  * @source http://blog.modulus.io/nodejs-and-sqlite
  */
 
-'use strict';
-
-const chalk = require('chalk');
+const debug = require('debug')('sqlite-crud:index');
 const dbInstance = require('./source/db-instance');
 const migrate = require('./source/migrate');
 const insertRow = require('./source/insertRow');
 const getRows = require('./source/getRows');
 const run = require('./source/run');
-const verbose = require('./source/verbose');
 
 
 /**
@@ -79,16 +75,11 @@ const updateRow = (tableName, data, where) => new Promise((resolve, reject) => {
     // console.log(chalk.blue('Query:'), query);
     // console.log('columnValues', columnValues);
 
-    DB.run(query, columnValues, (error) => {
-        if (error) {
-            if (verbose.getVerbose()) {
-                console.log(chalk.red.bold('[updateInTable error]'), error);
-            }
-            reject();
+    DB.run(query, columnValues, (err) => {
+        if (err) {
+            debug(err);
+            reject(err);
         } else {
-            if (verbose.getVerbose()) {
-                console.log(chalk.blue('Updated '), where);
-            }
             resolve();
         }
     });
@@ -99,16 +90,14 @@ const updateRow = (tableName, data, where) => new Promise((resolve, reject) => {
  * @param query {String}
  * @returns {Promise}
  */
-const queryOneRow = (query) => new Promise((resolve, reject) => {
+const queryOneRow = query => new Promise((resolve, reject) => {
     const DB = dbInstance.getDB();
 
     DB.get(query, (err, row) => {
         if (err) {
-            if (verbose.getVerbose()) {
-                console.log(chalk.red.bold('[getFromTable error]'), err);
-                console.log('QUERY was: ', query);
-            }
-            reject();
+            debug(err);
+            debug(`Query was: ${query}`);
+            reject(err);
         } else {
             resolve(row);
         }
@@ -125,11 +114,9 @@ const queryRows = (query, parameters = null) => new Promise((resolve, reject) =>
     const DB = dbInstance.getDB();
     const callback = (err, rows) => {
         if (err) {
-            if (verbose.getVerbose()) {
-                console.log(chalk.red.bold('[getAll error]'), err);
-                console.log('QUERY was: ', query);
-            }
-            reject();
+            debug(err);
+            debug(`Query was: ${query}`);
+            reject(err);
         } else {
             resolve(rows);
         }
@@ -181,22 +168,14 @@ const deleteRows = (tableName, where) => new Promise((resolve, reject) => {
         columnValues.push(whereItem.value);
     });
 
-    // console.log(chalk.blue('Query:'), query);
-    // console.log('columnValues', columnValues);
-
     DB.serialize(() => {
         DB.run('PRAGMA foreign_keys = ON;');
-        DB.run(query, columnValues, (error) => {
-            if (error) {
-                if (verbose.getVerbose()) {
-                    console.log(chalk.red.bold('[deleteRows error]'), error);
-                    console.log(chalk.blue('Query was:'), query);
-                }
-                reject();
+        DB.run(query, columnValues, (err) => {
+            if (err) {
+                debug(err);
+                debug(`Query was: ${query}`);
+                reject(err);
             } else {
-                if (verbose.getVerbose()) {
-                    console.log(chalk.blue('Deleted '), where);
-                }
                 resolve();
             }
         });
@@ -217,6 +196,5 @@ module.exports = {
     queryOneRow,
     queryRows,
     run,
-    migrate,
-    setVerbose: verbose.setVerbose,
+    migrate
 };

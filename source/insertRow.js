@@ -1,6 +1,4 @@
-/* eslint-disable no-console, strict*/
-'use strict';
-
+const debug = require('debug')('sqlite-crud:insertRow');
 const dbInstance = require('./db-instance');
 
 /**
@@ -29,6 +27,8 @@ const insertRow = (tableName, data) => new Promise((resolve, reject) => {
     if (columns.length === 0) {
         throw new Error('There is no columns in data object');
     }
+
+    // eslint-disable-next-line
     query += '(' + columns.join(',') + ') VALUES (';
     columns.forEach((column, i) => {
         query += '?';
@@ -38,12 +38,10 @@ const insertRow = (tableName, data) => new Promise((resolve, reject) => {
     });
     query += ')';
 
-    // console.log(chalk.blue('Query:'), query);
-
     try {
         const stmt = DB.prepare(query);
-        stmt.run(columnValues, function(error) {
-            if (!error) {
+        stmt.run(columnValues, function(err) {
+            if (!err) {
                 /**
                  * `this` object will contain:
                  * {
@@ -54,22 +52,21 @@ const insertRow = (tableName, data) => new Promise((resolve, reject) => {
                  */
                 resolve({ id: this.lastID });
             } else {
-                // console.log(chalk.red.bold('[insertRow error]'), error);
-                // console.log(chalk.red.bold('[insertRow data]'), data)
                 /**
                  * In case of UNIQUE constraint failed
                  * `error.errorno` will be 19
                  */
+                debug(err);
                 reject({
-                    errno: error.errno,
-                    code: error.code
+                    errno: err.errno,
+                    code: err.code,
                 });
             }
         });
         stmt.finalize();
-    } catch (e) {
-        console.log(chalk.red.bold('[insertRow error]'), e);
-        reject(e);
+    } catch (err) {
+        debug(err);
+        reject(err);
     }
 });
 

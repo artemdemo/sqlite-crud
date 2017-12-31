@@ -1,3 +1,6 @@
+## 2.1.0 (2018-01-01)
+* Reorganized structure of promises 
+
 ## 2.0 (2016-09-08)
 * Replaced `Q` with `new Promise()`
 

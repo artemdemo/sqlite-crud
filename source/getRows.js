@@ -1,8 +1,5 @@
-/* eslint-disable no-console, strict*/
-'use strict';
-
+const debug = require('debug')('sqlite-crud:getRows');
 const dbInstance = require('./db-instance');
-const verbose = require('./verbose');
 
 /**
  * Fetch rows from the table
@@ -43,15 +40,10 @@ const getRows = (tableName, where) => new Promise((resolve, reject) => {
         whereValues.push(whereItem.value);
     });
 
-    // console.log(chalk.blue('Query:'), query);
-    // console.log('whereValues', whereValues);
-
-    DB.all(query, whereValues, (error, rows) => {
-        if (error) {
-            if (verbose.getVerbose()) {
-                console.log(chalk.red.bold('[getRows error]'), error);
-            }
-            reject();
+    DB.all(query, whereValues, (err, rows) => {
+        if (err) {
+            debug(err);
+            reject(err);
         } else {
             resolve(rows);
         }

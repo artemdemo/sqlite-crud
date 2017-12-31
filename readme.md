@@ -267,16 +267,12 @@ DB.migrate('./migrations/20151102_create_dummy_tables.json')
     });
 ```
 
-### Verbose log
+### Print errors
 
-Print log from the module
+Set env variable `DEBUG`:
 
-```javascript
-/**
- * Print or not log of the module too the console
- * @param newVerbose {Boolean}
- */
-DB.setVerbose(newVerbose);
+```
+DEBUG=sqlite-crud:*
 ```
 
 ## SQLite database manager
