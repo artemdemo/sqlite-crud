@@ -54,9 +54,6 @@ DB.insertRow('tasks', {
             added: now.format('YYYY-MM-DD HH:mm:ss'),
             updated: now.format('YYYY-MM-DD HH:mm:ss')
         });
-    }, (error) => {
-        console.log(chalk.red.bold('[error]'), error);
-        reject();
     });
 ```
 
@@ -91,9 +88,6 @@ DB.updateRow('tasks', {
         value: task.id
     }]).then(() => {
         resolve();
-    }, (error) => {
-        console.log(chalk.red.bold('[error]'), error);
-        reject();
     });
 ```
 
@@ -125,9 +119,6 @@ DB.getRows('tasks', [{
     }])
         .then((rows) => {
             resolve(rows);
-        }, () => {
-            console.log(chalk.red.bold('[error]'), error);
-            reject();
         });
 ```
 
@@ -157,9 +148,6 @@ DB.deleteRows('tasks', [{
         value: taskId
     }]).then(() => {
         resolve();
-    }, (error) => {
-        console.log(chalk.red.bold('[deleteTask error]'), error);
-        reject();
     });
 ```
 
@@ -179,9 +167,6 @@ DB.queryOneRow('SELECT * FROM table_name;')
         // result - will be an object
         // If there is no match will be undefined
         resolve(result);
-    }, () => {
-        console.log(chalk.red.bold('[error]'), error);
-        reject();
     });
 ```
 
@@ -201,9 +186,6 @@ DB.queryRows('SELECT * FROM table_name WHERE name = ?;', ['Row name'])
     .then((rows) => {
         // rows - will be an array
         resolve(rows);
-    }, (error) => {
-        console.log(chalk.red.bold('[error]'), error);
-        reject();
     });
 ```
 
@@ -225,9 +207,6 @@ DB.run(
     ['run-test', 'run-test description']
 ).then((result) => {
     resolve(result.lastID);
-}, (error) => {
-    console.log(chalk.red.bold('[run error]'), error);
-    reject();
 });
 ```
 
