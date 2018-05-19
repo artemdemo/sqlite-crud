@@ -1,6 +1,8 @@
+const fs = require('fs');
+const { expect } = require('chai');
+
 const dbPath = './db/test-db.db';
 const testTableName = 'test';
-const fs = require('fs');
 
 let DB;
 
@@ -10,19 +12,19 @@ describe('Create new DB:', () => {
         fs.unlinkSync(dbPath);
     } catch (e) {}
 
-    DB = require('../index');
+    DB = require('../../index');
     DB.connectToDB(dbPath);
 
     it('DB file created', () => {
         fs.stat(dbPath, (error) => {
-            expect(error).toBe(null);
+            expect(error).to.equal(null);
         });
     });
 });
 
 describe('Create test table with migration:', () => {
     it('Wrong file name reject promise', (done) => {
-        DB.migrate('spec/migrations/wrong_path.json')
+        DB.migrate('source/__tests__/migrations/wrong_path.json')
             .then(() => {
                 done();
                 throw new Error('Error in DB');
@@ -33,14 +35,14 @@ describe('Create test table with migration:', () => {
     });
 
     it('Added test table', (done) => {
-        DB.migrate('spec/migrations/20151101_create_test_table.json')
+        DB.migrate('source/__tests__/migrations/20151101_create_test_table.json')
             .then(() => {
                 done();
             });
     });
 
     it('Test table can\'t be added twice', (done) => {
-        DB.migrate('spec/migrations/20151101_create_test_table.json')
+        DB.migrate('source/__tests__/migrations/20151101_create_test_table.json')
             .then(() => {
                 done();
                 throw new Error('Error in DB');
@@ -61,7 +63,7 @@ describe('Create test table with migration:', () => {
                             break;
                     }
                 });
-                expect(fileNamesCounter).toBe(1);
+                expect(fileNamesCounter).to.equal(1);
                 done();
             })
             .catch(() => {
@@ -73,7 +75,7 @@ describe('Create test table with migration:', () => {
 
 describe('Create 2 dummy tables with migration:', () => {
     it('Added 2 dummy tables', (done) => {
-        DB.migrate('spec/migrations/20151102_create_dummy_tables.json')
+        DB.migrate('source/__tests__/migrations/20151102_create_dummy_tables.json')
             .then(() => {
                 done();
             })
@@ -84,7 +86,7 @@ describe('Create 2 dummy tables with migration:', () => {
     });
 
     it('2 dummy tables can\'t be added twice', (done) => {
-        DB.migrate('spec/migrations/20151102_create_dummy_tables.json')
+        DB.migrate('source/__tests__/migrations/20151102_create_dummy_tables.json')
             .then(() => {
                 done();
                 throw new Error('Error in DB');
@@ -101,7 +103,7 @@ describe('Create 2 dummy tables with migration:', () => {
             name: 'First dummy01',
         }).then((result) => {
             rowId = result.id;
-            expect(rowId).toBe(1);
+            expect(rowId).to.equal(1);
             done();
         }).catch(() => {
             done();
@@ -116,7 +118,7 @@ describe('Create 2 dummy tables with migration:', () => {
             name: 'First dummy02',
         }).then((result) => {
             rowId = result.id;
-            expect(rowId).toBe(1);
+            expect(rowId).to.equal(1);
             done();
         }).catch(() => {
             done();
@@ -127,7 +129,7 @@ describe('Create 2 dummy tables with migration:', () => {
 
 describe('Test migration file with wrong query:', () => {
     it('Wrong query should be rejected', (done) => {
-        DB.migrate('spec/migrations/20151103_wrong_query.json')
+        DB.migrate('source/__tests__/migrations/20151103_wrong_query.json')
             .then(() => {
                 // shouldn't get here
                 done();
@@ -149,7 +151,7 @@ describe('Inserting new rows:', () => {
             added: '1980-11-28 13:45',
         }).then((result) => {
             rowId = result.id;
-            expect(rowId).toBe(1);
+            expect(rowId).to.equal(1);
             done();
         }).catch(() => {
             done();
@@ -164,7 +166,7 @@ describe('Inserting new rows:', () => {
             added: '1996-12-31 23:18',
         }).then((result) => {
             rowId = result.id;
-            expect(rowId).toBe(2);
+            expect(rowId).to.equal(2);
             done();
         }).catch(() => {
             done();
@@ -179,7 +181,7 @@ describe('Inserting new rows:', () => {
             added: '1996-12-31 23:18',
         }).then((result) => {
             rowId = result.id;
-            expect(rowId).toBe(3);
+            expect(rowId).to.equal(3);
             done();
         }).catch(() => {
             done();
@@ -194,7 +196,7 @@ describe('Getting rows from the table:', () => {
     it('Should be 3 rows in table', (done) => {
         DB.queryRows(`SELECT * FROM ${testTableName};`)
             .then((rows) => {
-                expect(rows.length).toBe(3);
+                expect(rows.length).to.equal(3);
                 done();
             })
             .catch(() => {
@@ -209,9 +211,9 @@ describe('Getting rows from the table:', () => {
             ['First name', 3]
         )
             .then((rows) => {
-                expect(rows.length).toBe(2);
-                expect(rows[0].name).toBe('First name');
-                expect(rows[1].id).toBe(3);
+                expect(rows.length).to.equal(2);
+                expect(rows[0].name).to.equal('First name');
+                expect(rows[1].id).to.equal(3);
                 done();
             })
             .catch(() => {
@@ -223,7 +225,7 @@ describe('Getting rows from the table:', () => {
     it('First row in table', (done) => {
         DB.queryOneRow(`SELECT * FROM ${testTableName};`)
             .then((result) => {
-                expect(result.name).toBe('First name');
+                expect(result.name).to.equal('First name');
                 done();
             })
             .catch(() => {
@@ -243,8 +245,8 @@ describe('Getting rows from the table:', () => {
             value: '1996-12-31 23:18',
         }])
             .then((result) => {
-                expect(result && result.length).toBe(1);
-                expect(result && result[0].name).toBe('Second name');
+                expect(result && result.length).to.equal(1);
+                expect(result && result[0].name).to.equal('Second name');
                 done();
             })
             .catch(() => {
@@ -260,7 +262,7 @@ describe('Getting rows from the table:', () => {
             value: '1996-12-31 23:18',
         }])
             .then((result) => {
-                expect(result && result.length).toBe(2);
+                expect(result && result.length).to.equal(2);
                 done();
             })
             .catch(() => {
@@ -291,7 +293,7 @@ describe('Updating row in table:', () => {
     it('Name in first row should changed', (done) => {
         DB.queryOneRow(`SELECT * FROM ${testTableName} WHERE id=1;`)
             .then((result) => {
-                expect(result.name).toBe('New First name');
+                expect(result.name).to.equal('New First name');
                 done();
             })
             .catch(() => {
@@ -312,7 +314,7 @@ describe('Updating row in table:', () => {
             comparator: '=',
             value: '1996-12-31 23:18',
         }]).then(() => {
-            expect(true).toBe(true);
+            expect(true).to.equal(true);
             done();
         }).catch(() => {
             done();
@@ -323,7 +325,7 @@ describe('Updating row in table:', () => {
     it('Name in second row should changed', (done) => {
         DB.queryOneRow(`SELECT * FROM ${testTableName} WHERE id=2;`)
             .then((result) => {
-                expect(result.name).toBe('New Second name');
+                expect(result.name).to.equal('New Second name');
                 done();
             })
             .catch(() => {
@@ -352,7 +354,7 @@ describe('Remove rows from table:', () => {
     it('There is no first row in table', (done) => {
         DB.queryOneRow(`SELECT * FROM ${testTableName} WHERE id=1;`)
             .then((result) => {
-                expect(result).toBe(undefined);
+                expect(result).to.equal(undefined);
                 done();
             })
             .catch(() => {
@@ -381,7 +383,7 @@ describe('Remove rows from table:', () => {
     it('There is no second row in table', (done) => {
         DB.queryOneRow(`SELECT * FROM ${testTableName} WHERE id=2;`)
             .then((result) => {
-                expect(result).toBe(undefined);
+                expect(result).to.equal(undefined);
                 done();
             })
             .catch(() => {
@@ -398,7 +400,7 @@ describe('Test DB.run()', () => {
                     (name, description, added)
              VALUES ('run-test', 'run-test description', '2096-11-11 11:34');`
         ).then((result) => {
-            expect(result.lastID > 1).toBe(true);
+            expect(result.lastID > 1).to.equal(true);
             done();
         }).catch(() => {
             done();
@@ -409,7 +411,7 @@ describe('Test DB.run()', () => {
 
 describe('Migrate folder:', () => {
     it('Create tables', (done) => {
-        DB.migrate('spec/migrations_dir')
+        DB.migrate('source/__tests__/migrations_dir')
             .then(() => {
                 done();
             })
@@ -420,7 +422,7 @@ describe('Migrate folder:', () => {
     });
 
     it('Tables can be created only once', (done) => {
-        DB.migrate('spec/migrations_dir')
+        DB.migrate('source/__tests__/migrations_dir')
             .then(() => {
                 done();
                 throw new Error('Error in DB');
@@ -447,7 +449,7 @@ describe('Migrate folder:', () => {
                             break;
                     }
                 });
-                expect(fileNamesCounter).toBe(3);
+                expect(fileNamesCounter).to.equal(3);
                 done();
             })
             .catch(() => {
@@ -463,7 +465,7 @@ describe('Migrate folder:', () => {
             name: 'First dummy03',
         }).then((result) => {
             rowId = result.id;
-            expect(rowId).toBe(1);
+            expect(rowId).to.equal(1);
             done();
         }).catch(() => {
             done();
@@ -478,7 +480,7 @@ describe('Migrate folder:', () => {
             name: 'First dummy04',
         }).then((result) => {
             rowId = result.id;
-            expect(rowId).toBe(1);
+            expect(rowId).to.equal(1);
             done();
         }).catch(() => {
             done();
@@ -493,7 +495,7 @@ describe('Migrate folder:', () => {
             name: 'First dummy05',
         }).then((result) => {
             rowId = result.id;
-            expect(rowId).toBe(1);
+            expect(rowId).to.equal(1);
             done();
         }).catch(() => {
             done();
@@ -504,7 +506,7 @@ describe('Migrate folder:', () => {
     it('Seeds added to the table', (done) => {
         DB.queryRows('SELECT * FROM seeds;')
             .then((rows) => {
-                expect(rows.length).toBe(4);
+                expect(rows.length).to.equal(4);
                 done();
             })
             .catch(() => {
