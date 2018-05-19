@@ -1,6 +1,6 @@
 {
   "name": "sqlite-crud",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "List of functions for common CRUD operations with SQLite database",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "@types/chai": "^4.1.3",
     "chai": "^4.1.2",
     "debug": "^3.1.0",
-    "eslint": "^4.14.0",
+    "eslint": "^4.19.1",
     "eslint-config-artem": "git+https://github.com/artemdemo/eslint-config-artem.git#3.0.0",
     "eslint-plugin-import": "^2.8.0",
     "mocha": "^5.2.0"
